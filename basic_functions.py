@@ -11,6 +11,7 @@ import seaborn as sns
 from sklearn.model_selection._split import _BaseKFold, indexable, _num_samples
 from sklearn import model_selection, metrics
 from scipy.stats import spearmanr
+from sklearn.preprocessing import MinMaxScaler
 
 from xgboost import XGBRegressor
 
