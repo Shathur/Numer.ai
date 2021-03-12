@@ -161,6 +161,30 @@ def get_feature_neutral_mean(df):
     return np.mean(scores)
 
 
+# plot the feature exposures
+def plot_feature_exposures(df, pred_name):
+    fe = feature_exposures(df, pred_name)
+    plt.figure()
+    xaxis = [fe[1][x] for x in range(0, len(fe[1]), 2)]
+    # print(xaxis)
+    # plt.xticks(rotation=90, fontsize=10, ticks=np.arange(0, len(fe[1]), 10))
+    ax = sns.barplot(x=fe[1], y=fe[0])
+    ax.legend(title='Max_feature_exposure : {}\n'
+                    'Mean feature exposure : {}'.format(max_feature_exposure(df, pred_name),
+                                                        feature_exposure(df, pred_name)))
+    plt.xticks(rotation=90, fontsize=8, ticks=np.arange(0, len(fe[1]), 2), labels=xaxis)
+    plt.show()
+    return fe
+
+
+# plot the correlations per era
+def plot_corrs_per_era(df, pred_name):
+    val_corrs = corr_score(df, pred_name)
+    plt.figure()
+    ax = sns.barplot(x=val_corrs.index.str.slice(3), y=val_corrs)
+    plt.show()
+
+
 # Feature Neutralization and plot the results
 def plot_feature_neutralization(tour_df, neut_percent, full=False, show_metrics=False, scores_on_val2=False,
                                 legend_title=None):
