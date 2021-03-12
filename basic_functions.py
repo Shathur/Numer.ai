@@ -161,6 +161,111 @@ def get_feature_neutral_mean(df):
     return np.mean(scores)
 
 
+# Feature Neutralization and plot the results
+def plot_feature_neutralization(tour_df, neut_percent, full=False, show_metrics=False, scores_on_val2=False,
+                                legend_title=None):
+    if full == False:
+        validation_data = tour_df[tour_df.data_type == "validation"]
+    else:
+        val2_eras = list(range(197, 213))
+        val2_eras = ['era' + str(x) for x in val2_eras]
+        validation_data = tour_df[tour_df['era'].isin(val2_eras)]
+
+    # Plot feature exposures
+    feat_exps, feats = feature_exposures(validation_data, PREDICTION_NAME)
+
+    plt.figure()
+    ax = sns.barplot(x=feats, y=feat_exps)
+    ax.legend(title='Max_feature_exposure : {}\n'
+                    'Mean feature exposure : {}'.format(max_feature_exposure(validation_data, PREDICTION_NAME),
+                                                        feature_exposure(validation_data, PREDICTION_NAME)))
+    plt.show()
+
+    val_corrs = corr_score(validation_data, PREDICTION_NAME)
+
+    val_sharpe = sharpe_score(val_corrs)
+
+    # Plot the feature exposures with neutralization
+    validation_data[PREDICTION_NAME_NEUTRALIZED] = neutralize_short(validation_data,
+                                                                    prediction_name=PREDICTION_NAME,
+                                                                    proportion=neut_percent)
+
+    feat_exps, feats = feature_exposures(validation_data, PREDICTION_NAME_NEUTRALIZED)
+
+    plt.figure()
+    ax1 = sns.barplot(x=feats, y=feat_exps)
+    ax1.legend(title='Max_feature_exposure : {}\n'
+                     'Mean feature exposure : {}'.format(
+        max_feature_exposure(validation_data, PREDICTION_NAME_NEUTRALIZED),
+        feature_exposure(validation_data, PREDICTION_NAME_NEUTRALIZED)))
+    plt.show()
+
+    val_corrs_neut = corr_score(validation_data, PREDICTION_NAME_NEUTRALIZED)
+    val_sharpe_neut = sharpe_score(val_corrs_neut)
+
+    # plot and print correlations per era
+    if show_metrics:
+        metrics = print_metrics(tour_df=validation_data, pred_name=PREDICTION_NAME, long_metrics=False)
+        if scores_on_val2:
+            metrics = print_metrics(tour_df=validation_data, pred_name=PREDICTION_NAME,
+                                    long_metrics=False, scores_on_val2=True)
+
+    # Plot the feature exposures with neutralization per era
+    validation_data[PRED_NAME_NEUT_PER_ERA] = neutralize(df=validation_data, columns=[PREDICTION_NAME],
+                                                         extra_neutralizers=feature_names,
+                                                         proportion=neut_percent, normalize=True, era_col='era')
+
+    # validation_data[PRED_NAME_NEUT_PER_ERA] = minmax_scale_values(df=validation_data,
+    #                                                               pred_name=PRED_NAME_NEUT_PER_ERA)
+
+    feat_exps, feats = feature_exposures(validation_data, PRED_NAME_NEUT_PER_ERA)
+
+    plt.figure()
+    ax1 = sns.barplot(x=feats, y=feat_exps)
+    ax1.legend(title='Max_feature_exposure : {}\n'
+                     'Mean feature exposure : {}'.format(
+        max_feature_exposure(validation_data, PRED_NAME_NEUT_PER_ERA),
+        feature_exposure(validation_data, PRED_NAME_NEUT_PER_ERA)))
+    plt.show()
+
+    val_corrs_neut_per_era = corr_score(validation_data, PRED_NAME_NEUT_PER_ERA)
+    val_sharpe_neut_per_era = sharpe_score(val_corrs_neut_per_era)
+
+    # plot and print correlations per era
+    if show_metrics:
+        metrics = print_metrics(tour_df=validation_data, pred_name=PREDICTION_NAME, long_metrics=False)
+        if scores_on_val2:
+            metrics = print_metrics(tour_df=validation_data, pred_name=PREDICTION_NAME,
+                                    long_metrics=False, scores_on_val2=True)
+
+    plt.figure()
+    ax1 = sns.barplot(x=val_corrs.index.str.slice(3), y=val_corrs)
+    ax1.legend(title=legend_title[0])
+    plt.show()
+
+    if show_metrics:
+        metrics = print_metrics(tour_df=validation_data, pred_name=PREDICTION_NAME_NEUTRALIZED, long_metrics=False)
+        if scores_on_val2:
+            metrics = print_metrics(tour_df=validation_data, pred_name=PREDICTION_NAME_NEUTRALIZED,
+                                    long_metrics=False, scores_on_val2=True)
+
+    plt.figure()
+    ax1 = sns.barplot(x=val_corrs_neut.index.str.slice(3), y=val_corrs_neut)
+    ax1.legend(title=legend_title[1])
+    plt.show()
+
+    if show_metrics:
+        metrics = print_metrics(tour_df=validation_data, pred_name=PRED_NAME_NEUT_PER_ERA, long_metrics=False)
+        if scores_on_val2:
+            metrics = print_metrics(tour_df=validation_data, pred_name=PRED_NAME_NEUT_PER_ERA,
+                                    long_metrics=False, scores_on_val2=True)
+
+    plt.figure()
+    ax1 = sns.barplot(x=val_corrs_neut_per_era.index.str.slice(3), y=val_corrs_neut_per_era)
+    ax1.legend(title=legend_title[2])
+    plt.show()
+
+
 def print_metrics(train_df=None, val_df=None, tour_df=None, feature_names=None, pred_name=None, long_metrics=True, scores_on_val2=False):
     # when you print neutralized metrics train_df has to be None cause we don't
     # neutralize our targets on train_df
