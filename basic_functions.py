@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+
 pd.options.mode.chained_assignment = None
 
 import csv
@@ -42,6 +43,9 @@ def sharpe_score(correlations):
     return sharpe
 
 
+# predict in batches to avoid memory issues
+# df should contain only the prediction features
+# i.e. training_data[feature_names]
 def predict_in_batch(model, df, batch):
     predictions = []
     for i in range(0, len(df), batch):
@@ -50,6 +54,9 @@ def predict_in_batch(model, df, batch):
     return predictions
 
 
+# predict in era batches to avoid memory issues
+# df should contain only the prediction features
+# i.e. training_data[feature_names]
 def predict_in_era_batch(model, df, era_idx):
     predictions = []
     for era in era_idx:
@@ -290,14 +297,16 @@ def plot_feature_neutralization(tour_df, neut_percent, full=False, show_metrics=
     plt.show()
 
 
-def print_metrics(train_df=None, val_df=None, tour_df=None, feature_names=None, pred_name=None, long_metrics=True, scores_on_val2=False):
+def print_metrics(train_df=None, val_df=None, tour_df=None, feature_names=None, pred_name=None, long_metrics=True,
+                  scores_on_val2=False):
     # when you print neutralized metrics train_df has to be None cause we don't
     # neutralize our targets on train_df
 
     if train_df is not None:
         # Check the per-era correlations on the training set (in sample)
         train_correlations = corr_score(train_df, pred_name)
-        print(f"On training the correlation has mean {train_correlations.mean()} and std {train_correlations.std(ddof=0)}")
+        print(
+            f"On training the correlation has mean {train_correlations.mean()} and std {train_correlations.std(ddof=0)}")
     else:
         train_correlations = []
 
@@ -369,8 +378,9 @@ def print_metrics(train_df=None, val_df=None, tour_df=None, feature_names=None, 
             print(f"Max Feature Exposure for oof: {max_feature_exposure}")
 
         # Check the feature exposure of your validation predictions
-        feature_exposures = validation_data[feature_names].apply(lambda d: spearman(validation_data[PREDICTION_NAME], d),
-                                                                 axis=0)
+        feature_exposures = validation_data[feature_names].apply(
+            lambda d: spearman(validation_data[PREDICTION_NAME], d),
+            axis=0)
         max_per_era = validation_data.groupby("era").apply(
             lambda d: d[feature_names].corrwith(d[PREDICTION_NAME]).abs().max())
         max_feature_exposure = max_per_era.mean()
@@ -416,7 +426,7 @@ def get_predictions(df=None, num_models=1, folder_name=None):
 
 
 # FN on either tournament or validation data
-def run_feature_neutralization(df=None, predictions_total=None, proportion=0.5, no_fn=False):
+def run_feature_neutralization(df=None, predictions_total=None, proportion=0.5, neut_type='short', no_fn=False):
     if no_fn:
         preds = predictions_total
     else:
@@ -437,13 +447,19 @@ def run_feature_neutralization(df=None, predictions_total=None, proportion=0.5, 
 
         # DEFINE FEATURE NEUTRALIZATION PERCENTAGE
         # CAREFUL THIS IS DIFFERENT BETWEEN SUBMISSIONS
-        df[PREDICTION_NAME_NEUTRALIZED] = neutralize_short(df,
-                                                           prediction_name=PREDICTION_NAME,
-                                                           proportion=proportion)
-
-        # df[PREDICTION_NAME_NEUTRALIZED] = neutralize(df=df, columns=[PREDICTION_NAME],
-        #                                         extra_neutralizers=df.columns[df.columns.str.startswith('feature')],
-        #                                         proportion=proportion, normalize=True, era_col='era')
+        # neut_type has to be either 'short' for neutralize_short()
+        #                     either 'perera' for neutralize()
+        if neut_type == 'short':
+            df[PREDICTION_NAME_NEUTRALIZED] = neutralize_short(df,
+                                                               prediction_name=PREDICTION_NAME,
+                                                               proportion=proportion)
+        elif neut_type == 'perera':
+            df[PREDICTION_NAME_NEUTRALIZED] = neutralize(df=df, columns=[PREDICTION_NAME],
+                                                         extra_neutralizers=df.columns[
+                                                             df.columns.str.startswith('feature')],
+                                                         proportion=proportion, normalize=True, era_col='era')
+        else:
+            print('Error keyword given for neut_type. Needed ''short'' or ''perera'' ')
 
         validation_data = df[df['data_type'] == 'validation']
         val_corrs = corr_score(validation_data, PREDICTION_NAME_NEUTRALIZED)
