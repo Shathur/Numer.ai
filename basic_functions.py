@@ -22,6 +22,40 @@ PREDICTION_NAME_NEUTRALIZED = f'prediction_neutralized'
 PRED_NAME_NEUT_PER_ERA = f'prediction_neutralized_per_era'
 
 
+# Read the csv file into a pandas Dataframe as float16 to save space
+def read_csv(file_path, rows_num, load_val=False):
+    with open(file_path, 'r') as f:
+        column_names = next(csv.reader(f))
+
+    # dtypes = {x: np.float16 for x in column_names if x.startswith(('feature', 'target'))}
+    # df = pd.read_csv(file_path, dtype=dtypes, index_col=0)
+
+    if load_val:
+        read_rows_skip = pd.read_csv('C:/Users/Ilias/Desktop/Numer.ai/numerai_datasets/validation_indexes.csv')
+        skip_rows = list(read_rows_skip['0'])
+        df = pd.read_csv("C:/Users/Ilias/Desktop/Numer.ai/numerai_datasets/numerai_tournament_data.csv",
+                         skiprows=skip_rows)
+        # df[df['era'] == 'era852']
+        # df[df['era'] == 'eraX']
+        df.drop(index=56260, inplace=True)
+        df.drop(index=137778, inplace=True)
+    else:
+        if rows_num == 0:
+            # Memory constrained? Try this instead (slower, but more memory efficient)
+            # see https://forum.numer.ai/t/saving-memory-with-uint8-features/254
+            dtypes = {f"target": np.float16}
+            to_uint8 = lambda x: np.uint8(float(x) * 4)
+            converters = {x: to_uint8 for x in column_names if x.startswith('feature')}
+            df = pd.read_csv(file_path, dtype=dtypes, converters=converters)
+        else:
+            dtypes = {f"target": np.float16}
+            to_uint8 = lambda x: np.uint8(float(x) * 4)
+            converters = {x: to_uint8 for x in column_names if x.startswith('feature')}
+            df = pd.read_csv(file_path, dtype=dtypes, converters=converters, nrows=rows_num)
+
+    return df
+
+
 # convenience method for scoring
 def score(df, pred_name):
     return spearman(df[pred_name], df[TARGET_NAME])
