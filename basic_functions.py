@@ -56,6 +56,25 @@ def read_csv(file_path, rows_num, load_val=False):
     return df
 
 
+# read the full data
+def load_data():
+    # Load data
+    print("Loading data...")
+    # The training data is used to train your model how to predict the targets.
+    training_data = pd.read_csv(
+        "https://numerai-public-datasets.s3-us-west-2.amazonaws.com/latest_numerai_training_data.csv.xz")
+    # The tournament data is the data that Numerai uses to evaluate your model.
+    tournament_data = pd.read_csv(
+        "https://numerai-public-datasets.s3-us-west-2.amazonaws.com/latest_numerai_tournament_data.csv.xz")
+
+    feature_names = [
+        f for f in training_data.columns if f.startswith("feature")
+    ]
+    print(f"Loaded {len(feature_names)} features")
+
+    return training_data, tournament_data, feature_names
+
+
 # convenience method for scoring
 def score(df, pred_name):
     return spearman(df[pred_name], df[TARGET_NAME])
