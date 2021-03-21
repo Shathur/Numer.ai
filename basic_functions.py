@@ -16,6 +16,8 @@ from sklearn.preprocessing import MinMaxScaler
 
 from xgboost import XGBRegressor
 
+from feature_neutralization import *
+
 TARGET_NAME = f'target'
 PREDICTION_NAME = f'prediction'
 PREDICTION_NAME_NEUTRALIZED = f'prediction_neutralized'
