@@ -25,7 +25,7 @@ PRED_NAME_NEUT_PER_ERA = f'prediction_neutralized_per_era'
 
 
 # Read the csv file into a pandas Dataframe as float16 to save space
-def read_csv(file_path, rows_num, load_val=False):
+def read_csv(file_path, rows_num, skip_rows_num, load_val=False):
     with open(file_path, 'r') as f:
         column_names = next(csv.reader(f))
 
@@ -48,7 +48,7 @@ def read_csv(file_path, rows_num, load_val=False):
             dtypes = {f"target": np.float16}
             to_uint8 = lambda x: np.uint8(float(x) * 4)
             converters = {x: to_uint8 for x in column_names if x.startswith('feature')}
-            df = pd.read_csv(file_path, dtype=dtypes, converters=converters)
+            df = pd.read_csv(file_path, skiprows=[i for i in range(1, skip_rows_num)], dtype=dtypes, converters=converters)
         else:
             dtypes = {f"target": np.float16}
             to_uint8 = lambda x: np.uint8(float(x) * 4)
