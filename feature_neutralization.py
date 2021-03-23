@@ -127,7 +127,7 @@ def reduce_exposure(prediction, features, max_exp, era, weights=None):
 
 
 def reduce_all_exposures(df, column=["prediction"], neutralizers=None,
-                         LM_CACHE_FILE=None,
+                         lm_cache_file=None,
                          normalize=True,
                          gaussianize=True,
                          era_col="era",
@@ -135,8 +135,8 @@ def reduce_all_exposures(df, column=["prediction"], neutralizers=None,
     if neutralizers is None:
         neutralizers = [x for x in df.columns if x.startswith("feature")]
     neutralized = []
-    if LM_CACHE_FILE.is_file():
-        cache = joblib.load(LM_CACHE_FILE)
+    if lm_cache_file.is_file():
+        cache = joblib.load(lm_cache_file)
         # Remove weights for eraX if we'd accidentally saved it in the past.
         cache.pop("eraX", None)
     else:
@@ -160,7 +160,7 @@ def reduce_all_exposures(df, column=["prediction"], neutralizers=None,
                                           max_exp, era, cache.get(era))
         if era not in cache and era != "eraX":
             cache[era] = weights
-            joblib.dump(cache, LM_CACHE_FILE)
+            joblib.dump(cache, lm_cache_file)
         scores /= tf.math.reduce_std(scores)
         scores -= tf.reduce_min(scores)
         scores /= tf.reduce_max(scores)
