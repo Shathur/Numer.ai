@@ -25,7 +25,7 @@ PRED_NAME_NEUT_PER_ERA = f'prediction_neutralized_per_era'
 
 
 # Read the csv file into a pandas Dataframe as float16 to save space
-def read_csv(file_path, rows_num, skip_rows_num, load_val=False):
+def read_csv(file_path, rows_num=0, skip_rows_num=0, load_val=False):
     with open(file_path, 'r') as f:
         column_names = next(csv.reader(f))
 
