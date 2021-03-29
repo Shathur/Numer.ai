@@ -81,6 +81,9 @@ def neutralize_series(series, by, proportion=1.0):
     return neutralized
 
 
+# original code written by JRB at JTaylor's github
+# https://github.com/jonrtaylor/twitch/blob/master/FE_Clipping_Script.ipynb
+# here we gather the functions and with minor changes implement them into our pipeline
 @tf.function(experimental_relax_shapes=True, experimental_compile=True)
 def exposures(x, y):
     x = x - tf.math.reduce_mean(x, axis=0)
@@ -169,3 +172,27 @@ def reduce_all_exposures(df, column=["prediction"], neutralizers=None,
     predictions = pd.DataFrame(np.concatenate(neutralized),
                                columns=column, index=df.index)
     return predictions
+
+
+# Put together the code above into a pipeline
+def neutralization_trimming(tour_df = None, preds=None, lm_cache_file=None, max_exp=None):
+    tour_df[PREDICTION_NAME] = preds
+
+    # save predictions to transfer model either for inference or feature exposure clipping
+    predictions_df = tour_df.index.to_frame().reset_index(drop=True)
+    predictions_df['prediction_kazutsugi'] = tour_df[PREDICTION_NAME].reset_index(drop=True)
+    predictions_df.to_csv("predictions_saved.csv", index=False)
+
+    # Predictions we want to trim
+    predictions_df = pd.read_csv('predictions_saved.csv', index_col=0)
+
+    # we merge the tournament data with our predictions so we have already dropped the indexes
+    full_df = pd.merge(tour_df, predictions_df, left_index=True, right_index=True)
+
+    full_df.rename(columns={'prediction_kazutsugi': 'prediction'}, inplace=True)
+
+    neutralized_predictions_df = reduce_all_exposures(df=full_df, lm_cache_file=LM_CACHE_FILE, max_exp=0.10)
+
+    tour_df[PREDICTION_NAME_NEUTRALIZED] = neutralized_predictions_df['prediction']
+
+    return neutralized_predictions_df[PREDICTION_NAME]
