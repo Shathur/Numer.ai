@@ -33,10 +33,13 @@ def read_csv(file_path, rows_num=0, skip_rows_num=0, load_val=False):
     # df = pd.read_csv(file_path, dtype=dtypes, index_col=0)
 
     if load_val:
+        dtypes = {f"target": np.float16}
+        to_uint8 = lambda x: np.uint8(float(x) * 4)
+        converters = {x: to_uint8 for x in column_names if x.startswith('feature')}
         read_rows_skip = pd.read_csv('C:/Users/Ilias/Desktop/Numer.ai/numerai_datasets/validation_indexes.csv')
         skip_rows = list(read_rows_skip['0'])
         df = pd.read_csv("C:/Users/Ilias/Desktop/Numer.ai/numerai_datasets/numerai_tournament_data.csv",
-                         skiprows=skip_rows)
+                         skiprows=skip_rows, dtype=dtypes, converters=converters)
         # df[df['era'] == 'era852']
         # df[df['era'] == 'eraX']
         df.drop(index=56260, inplace=True)
