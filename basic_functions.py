@@ -29,34 +29,40 @@ def read_csv(file_path, rows_num=0, skip_rows_num=0, load_val=False):
     with open(file_path, 'r') as f:
         column_names = next(csv.reader(f))
 
+    # Memory constrained? Try this instead (slower, but more memory efficient)
+    # see https://forum.numer.ai/t/saving-memory-with-uint8-features/254
+
     # dtypes = {x: np.float16 for x in column_names if x.startswith(('feature', 'target'))}
     # df = pd.read_csv(file_path, dtype=dtypes, index_col=0)
 
+    # dtypes = {f"target": np.float16}
+    # to_uint8 = lambda x: np.uint8(float(x) * 4)
+    # converters = {x: to_uint8 for x in column_names if x.startswith('feature')}
+    # df = pd.read_csv(file_path, dtype=dtypes, converters=converters)
+
     if load_val:
-        dtypes = {f"target": np.float16}
-        to_uint8 = lambda x: np.uint8(float(x) * 4)
-        converters = {x: to_uint8 for x in column_names if x.startswith('feature')}
+        dtypes = {x: np.float16 for x in column_names if x.startswith(('feature', 'target'))}
         read_rows_skip = pd.read_csv('C:/Users/Ilias/Desktop/Numer.ai/numerai_datasets/validation_indexes.csv')
         skip_rows = list(read_rows_skip['0'])
+        # extend skip_rows list to include future extra eras
+        skip_rows = skip_rows + list(range((skip_rows[-1] + 2), np.int(10e6)))
         df = pd.read_csv("C:/Users/Ilias/Desktop/Numer.ai/numerai_datasets/numerai_tournament_data.csv",
-                         skiprows=skip_rows, dtype=dtypes, converters=converters)
+                         skiprows=skip_rows, dtype=dtypes)
         # df[df['era'] == 'era852']
         # df[df['era'] == 'eraX']
         df.drop(index=56260, inplace=True)
         df.drop(index=137778, inplace=True)
     else:
         if rows_num == 0:
-            # Memory constrained? Try this instead (slower, but more memory efficient)
-            # see https://forum.numer.ai/t/saving-memory-with-uint8-features/254
             dtypes = {f"target": np.float16}
             to_uint8 = lambda x: np.uint8(float(x) * 4)
             converters = {x: to_uint8 for x in column_names if x.startswith('feature')}
-            df = pd.read_csv(file_path, skiprows=[i for i in range(1, skip_rows_num)], dtype=dtypes, converters=converters)
+            df = pd.read_csv(file_path, skiprows=[i for i in range(1, skip_rows_num)], dtype=dtypes,
+                             converters=converters)
         else:
-            dtypes = {f"target": np.float16}
-            to_uint8 = lambda x: np.uint8(float(x) * 4)
-            converters = {x: to_uint8 for x in column_names if x.startswith('feature')}
-            df = pd.read_csv(file_path, dtype=dtypes, converters=converters, nrows=rows_num)
+            dtypes = {x: np.float16 for x in column_names if x.startswith(('feature', 'target'))}
+
+            df = pd.read_csv(file_path, dtype=dtypes, nrows=rows_num)
 
     return df
 
