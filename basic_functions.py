@@ -5,6 +5,7 @@ pd.options.mode.chained_assignment = None
 
 import csv
 import time
+import pickle
 
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -84,6 +85,19 @@ def load_data():
     print(f"Loaded {len(feature_names)} features")
 
     return training_data, tournament_data, feature_names
+
+
+"""
+save and load dtypes object for reading csvs with lower memory
+"""
+def save_obj(obj, name):
+    with open(name + '.pkl', 'wb') as f:
+        pickle.dump(obj, f, pickle.HIGHEST_PROTOCOL)
+
+
+def load_obj(name):
+    with open(name + '.pkl', 'rb') as f:
+        return pickle.load(f)
 
 
 # convenience method for scoring
