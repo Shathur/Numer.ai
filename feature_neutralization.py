@@ -191,7 +191,7 @@ def neutralization_trimming(tour_df = None, preds=None, lm_cache_file=None, max_
 
     full_df.rename(columns={'prediction_kazutsugi': 'prediction'}, inplace=True)
 
-    neutralized_predictions_df = reduce_all_exposures(df=full_df, lm_cache_file=LM_CACHE_FILE, max_exp=0.10)
+    neutralized_predictions_df = reduce_all_exposures(df=full_df, lm_cache_file=lm_cache_file, max_exp=0.10)
 
     tour_df[PREDICTION_NAME_NEUTRALIZED] = neutralized_predictions_df['prediction']
 
