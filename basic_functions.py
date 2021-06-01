@@ -407,7 +407,7 @@ def get_model_lst(num_models=1, folder_name=None):
 
 
 # predict in batches. XGBRegressor supported only atm
-def get_predictions(df=None, num_models=1, folder_name=None):
+def get_predictions(df=None, num_models=1, folder_name=None, batch_size=20000):
     model_lst = get_model_lst(num_models=num_models, folder_name=folder_name)
     predictions_total = []
     for cv_num in range(num_models):
@@ -418,11 +418,10 @@ def get_predictions(df=None, num_models=1, folder_name=None):
         # select the feature columns from the tournament data
         X_test = df
 
-        # predict in batches to avoid memory issues
-        batch_pred = 20000
+        # predict in batches to avoid memory issuessize
         predictions = []
-        for i in range(0, len(X_test), batch_pred):
-            preds = model.predict(X_test[i: i + batch_pred])
+        for i in range(0, len(X_test), batch_size):
+            preds = model.predict(X_test[i: i + batch_size])
             predictions.extend(preds)
 
         predictions_total.append(predictions)
