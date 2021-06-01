@@ -418,11 +418,37 @@ def get_predictions(df=None, num_models=1, folder_name=None, batch_size=20000):
         # select the feature columns from the tournament data
         X_test = df
 
-        # predict in batches to avoid memory issuessize
+        # predict in batches to avoid memory issues
         predictions = []
         for i in range(0, len(X_test), batch_size):
             preds = model.predict(X_test[i: i + batch_size])
             predictions.extend(preds)
+
+        predictions_total.append(predictions)
+
+    predictions_total = np.mean(predictions_total, axis=0)
+
+    return predictions_total
+
+
+# predict in batches. XGBRegressor supported only atm
+def get_predictions_per_era(df=None, num_models=1, folder_name=None, batch_size=20000):
+    model_lst = get_model_lst(num_models=num_models, folder_name=folder_name)
+    predictions_total = []
+    for cv_num in range(num_models):
+        model = XGBRegressor(max_depth=5, learning_rate=0.01, n_estimators=1000, n_jobs=-1, colsample_bytree=0.1,
+                             tree_method='gpu_hist', verbosity=0)  # tree_method='gpu_hist',
+        model.load_model(model_lst[cv_num])
+
+        # select the feature columns from the tournament data
+        X_test = df
+            
+        era_lst = df['era'].unique()
+        era_idx = [df[df['era'] == x].index for x in era_lst]
+
+        predictions = predict_in_era_batch(model=model,
+                                           df=X_test,
+                                           era_idx=era_idx)
 
         predictions_total.append(predictions)
 
