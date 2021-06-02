@@ -146,7 +146,7 @@ def predict_in_era_batch(model, df, era_idx):
 # get indices corresponding to each era
 def get_era_idx(df):
     era_lst = df['era'].unique()
-    era_idx = [[df[df['era'] == x]].index for x in era_lst]
+    era_idx = [df[df['era'] == x].index for x in era_lst]
     return era_idx
 
 
