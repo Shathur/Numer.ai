@@ -143,6 +143,13 @@ def predict_in_era_batch(model, df, era_idx):
     return predictions
 
 
+# get indices corresponding to each era
+def get_era_idx(df):
+    era_lst = df['era'].unique()
+    era_idx = [[df[df['era'] == x]].index for x in era_lst]
+    return era_idx
+
+
 def feature_exposures(df, pred_name):
     feature_names = [f for f in df.columns
                      if f.startswith("feature")]
@@ -432,7 +439,7 @@ def get_predictions(df=None, num_models=1, folder_name=None, batch_size=20000):
 
 
 # predict in batches. XGBRegressor supported only atm
-def get_predictions_per_era(df=None, num_models=1, folder_name=None, batch_size=20000):
+def get_predictions_per_era(df=None, num_models=1, folder_name=None, era_idx=None):
     model_lst = get_model_lst(num_models=num_models, folder_name=folder_name)
     predictions_total = []
     for cv_num in range(num_models):
@@ -442,9 +449,6 @@ def get_predictions_per_era(df=None, num_models=1, folder_name=None, batch_size=
 
         # select the feature columns from the tournament data
         X_test = df
-            
-        era_lst = df['era'].unique()
-        era_idx = [df[df['era'] == x].index for x in era_lst]
 
         predictions = predict_in_era_batch(model=model,
                                            df=X_test,

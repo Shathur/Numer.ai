@@ -101,7 +101,7 @@ class Plotter:
     def plot_single_round(self):
         models_melted = pd.melt(pd.concat(self.get_models_df_lst()).reset_index(drop=True), id_vars=['id', 'date'],
                                 value_vars=[self.metric_to_plot])
-        models_melted['date'] = models_melted['date'].apply(fix_format)
+        models_melted['date'] = models_melted['date'].apply(self.fix_format)
 
         plt.figure()
         sns.lineplot(x='date', y='value', hue='id', data=models_melted, sort=False)  # hue='variable
@@ -112,24 +112,25 @@ class Plotter:
     def plot_subplot(self):
         count_rnd = 0
         models_df_lst = self.get_models_df_lst()
-        fig, axes = self.plot_multiple_rounds()
+        fig, axes = self.create_subplot_axes()
         print(axes)
         for rnd in self.round_id:
             model_rnd = pd.concat(models_df_lst).reset_index(drop=True)
             model_rnd = model_rnd[model_rnd['roundNumber'] == rnd]
             models_melted = pd.melt(model_rnd, id_vars=['id', 'date'],
                                     value_vars=[self.metric_to_plot])
-            models_melted['date'] = models_melted['date'].apply(fix_format)
+            models_melted['date'] = models_melted['date'].apply(self.fix_format)
 
             ax = axes.flatten()[count_rnd]
             plt.setp(ax.xaxis.get_majorticklabels(), rotation=45)
+            ax.grid(True, axis='both')
             ax.set_xlim((0, model_rnd.shape[0]//len(self.models_lst)))
             sns.lineplot(ax=ax, x='date', y='value', hue='id', data=models_melted, sort=False)  # hue='variable
             plt.show()
 
             count_rnd += 1
 
-    def plot_multiple_rounds(self):
+    def create_subplot_axes(self):
         cols_num = 3
         if len(self.round_id) % cols_num == 0:
             x_dim = len(self.round_id) // cols_num
@@ -143,6 +144,21 @@ class Plotter:
         # flatten axes dimension to be used as positional arguments
 
         return fig, axes
+
+
+def read_model():
+    stored_csv = pd.read_csv('C:/Users/Ilias/Desktop/Numer.ai/Changes_Lookup_Destination.csv')
+    return stored_csv
+
+xa = read_model()
+xaxa = xa[xa['MODELS']=='melian'].dropna(axis=1)
+change_info = xaxa.iloc[:, -1:].iloc[0,0].split(',')
+
+prev_slot = xa[xa['MODELS']==change_info[2]].dropna(axis=1)
+prev_slot[prev_slot.iloc[0, :].str.contains('melian')]
+prev_slot.loc[:, column.isin(['CHANGE1', 'CHANGE2'])].str.contains('lala')
+
+
 
 
 plotter = Plotter(['melian', 'ulmo'], [250, 251, 255, 256, 263], 'corr+mmc')
