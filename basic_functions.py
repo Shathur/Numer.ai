@@ -400,6 +400,14 @@ def print_metrics(train_df=None, val_df=None, tour_df=None, feature_names=None, 
         max_feature_exposure = max_per_era.mean()
         print(f"Max Feature Exposure for validation: {max_feature_exposure}")
 
+        # Check feature neutral mean for oof
+        feature_neutral_mean = get_feature_neutral_mean(val_df)
+        print(f"Feature Neutral Mean for oof is {feature_neutral_mean}")
+
+        # Check feature neutral mean for validation
+        feature_neutral_mean = get_feature_neutral_mean(validation_data)
+        print(f"Feature Neutral Mean for validation is {feature_neutral_mean}")
+
     return [oof_correlations, validation_correlations, oof_sharpe, validation_sharpe]
 
 
