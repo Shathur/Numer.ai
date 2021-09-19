@@ -2,8 +2,8 @@ from basic_functions import *
 from feature_neutralization import *
 
 
-def print_metrics(train_df=None, val_df=None, tour_df=None, feature_names=None, pred_name=None, long_metrics=True,
-                  scores_on_val2=False):
+def print_metrics_new(train_df=None, val_df=None, tour_df=None, feature_names=None, pred_name=None, long_metrics=True,
+                      scores_on_val2=False):
     # when you print neutralized metrics train_df has to be None cause we don't
     # neutralize our targets on train_df
 
