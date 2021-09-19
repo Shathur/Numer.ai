@@ -2,6 +2,16 @@ from basic_functions import *
 from feature_neutralization import *
 
 
+# plot the correlations per era
+# era columns in the new data include
+# just the numbers
+def plot_corrs_per_era(df, pred_name):
+    val_corrs = corr_score(df, pred_name)
+    plt.figure()
+    ax = sns.barplot(x=val_corrs.index.str, y=val_corrs)
+    plt.show()
+
+
 def print_metrics_new(train_df=None, val_df=None, tour_df=None, feature_names=None, pred_name=None, long_metrics=True,
                       scores_on_val2=False):
     # when you print neutralized metrics train_df has to be None cause we don't
