@@ -5,7 +5,7 @@ from feature_neutralization import *
 # plot the correlations per era
 # era columns in the new data include
 # just the numbers
-def plot_corrs_per_era(df, pred_name):
+def plot_corrs_per_era_new(df, pred_name):
     val_corrs = corr_score(df, pred_name)
     plt.figure()
     ax = sns.barplot(x=val_corrs.index.str, y=val_corrs)
