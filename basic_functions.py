@@ -448,11 +448,9 @@ def get_predictions(df=None, num_models=1, folder_name=None, batch_size=20000):
 
 
 # predict in batches. XGBRegressor supported only atm
-def get_predictions_per_era(df=None, num_models=1, folder_name=None):
+def get_predictions_per_era(df=None, num_models=1, folder_name=None, era_idx=[]):
     model_lst = get_model_lst(num_models=num_models, folder_name=folder_name)
     predictions_total = []
-
-    era_idx = get_era_idx(df)
 
     for cv_num in range(num_models):
         model = XGBRegressor(max_depth=5, learning_rate=0.01, n_estimators=1000, n_jobs=-1, colsample_bytree=0.1,
