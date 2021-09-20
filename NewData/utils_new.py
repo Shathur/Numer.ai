@@ -8,7 +8,7 @@ from feature_neutralization import *
 def plot_corrs_per_era_new(df, pred_name):
     val_corrs = corr_score(df, pred_name)
     plt.figure()
-    ax = sns.barplot(x=val_corrs.index.str, y=val_corrs)
+    ax = sns.barplot(x=val_corrs.index, y=val_corrs)
     plt.show()
 
 
