@@ -90,6 +90,8 @@ def load_data():
 """
 save and load dtypes object for reading csvs with lower memory
 """
+
+
 def save_obj(obj, name):
     with open(name + '.pkl', 'wb') as f:
         pickle.dump(obj, f, pickle.HIGHEST_PROTOCOL)
@@ -135,10 +137,18 @@ def predict_in_batch(model, df, batch):
 # predict in era batches to avoid memory issues
 # df should contain only the prediction features
 # i.e. training_data[feature_names]
-def predict_in_era_batch(model, df, era_idx):
+def predict_in_era_batch(model, df, era_idx, rank_per_era):
+    """
+    rank_per_era=True : returns predictions that are the ranking
+        of our predictions per era
+    rank_per_era=False : returns the predictions of each era,
+        concatenated to one another
+    """
     predictions = []
     for era in era_idx:
         preds = model.predict(df.loc[era])
+        if rank_per_era:
+            preds = np.array(pd.Series(preds).rank())
         predictions.extend(preds)
     return predictions
 
@@ -448,7 +458,8 @@ def get_predictions(df=None, num_models=1, folder_name=None, batch_size=20000):
 
 
 # predict in batches. XGBRegressor supported only atm
-def get_predictions_per_era(df=None, num_models=1, folder_name=None, era_idx=[]):
+def get_predictions_per_era(df=None, num_models=1, folder_name=None, era_idx=[],
+                            rank_average=False):
     model_lst = get_model_lst(num_models=num_models, folder_name=folder_name)
     predictions_total = []
 
@@ -462,13 +473,18 @@ def get_predictions_per_era(df=None, num_models=1, folder_name=None, era_idx=[])
 
         predictions = predict_in_era_batch(model=model,
                                            df=X_test,
-                                           era_idx=era_idx)
+                                           era_idx=era_idx,
+                                           rank_per_era=rank_average)
 
         predictions_total.append(predictions)
 
-    predictions_total = np.mean(predictions_total, axis=0)
+        if rank_average:
+            scaler = MinMaxScaler(feature_range=(0, 1))
+            predictions_final = scaler.fit_transform(X=np.mean(predictions_total, axis=0).reshape(-1, 1))
+        else:
+            predictions_final = np.mean(predictions_total, axis=0)
 
-    return predictions_total
+    return predictions_final
 
 
 # FN on either tournament or validation data
