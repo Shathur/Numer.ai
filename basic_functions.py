@@ -489,6 +489,8 @@ def get_predictions_per_era(df=None, num_models=1, folder_name=None, era_idx=[],
 
 # FN on either tournament or validation data
 def run_feature_neutralization(df=None, predictions_total=None, proportion=0.5, neut_type='short', no_fn=False):
+    assert(neut_type in ['short', 'perera'],
+           'Wrong keyword given for neut_type. Needed ''short'' or ''perera'' ')
     if no_fn:
         preds = predictions_total
     else:
@@ -520,8 +522,6 @@ def run_feature_neutralization(df=None, predictions_total=None, proportion=0.5, 
                                                          extra_neutralizers=df.columns[
                                                              df.columns.str.startswith('feature')],
                                                          proportion=proportion, normalize=True, era_col='era')
-        else:
-            print('Error keyword given for neut_type. Needed ''short'' or ''perera'' ')
 
         validation_data = df[df['data_type'] == 'validation']
         val_corrs = corr_score(validation_data, PREDICTION_NAME_NEUTRALIZED)
