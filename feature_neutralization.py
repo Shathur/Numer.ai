@@ -195,4 +195,4 @@ def neutralization_trimming(tour_df = None, preds=None, lm_cache_file=None, max_
 
     tour_df[PREDICTION_NAME_NEUTRALIZED] = neutralized_predictions_df['prediction']
 
-    return neutralized_predictions_df[PREDICTION_NAME]
+    return neutralized_predictions_df[PREDICTION_NAME].values
