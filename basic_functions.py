@@ -541,6 +541,6 @@ def run_feature_neutralization(df=None, predictions_total=None, proportion=0.5, 
         df[PREDICTION_NAME_NEUTRALIZED] = minmaxscaler.transform(
             np.array(df[PREDICTION_NAME_NEUTRALIZED]).reshape(-1, 1))
 
-        preds = df[PREDICTION_NAME_NEUTRALIZED].copy()
-
+        # preds = df[PREDICTION_NAME_NEUTRALIZED].copy()
+        preds = df[PREDICTION_NAME_NEUTRALIZED].values  # np.array of predictions
     return preds
