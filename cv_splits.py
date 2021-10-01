@@ -121,7 +121,6 @@ def cvscore(clf, X, y, sample_weight, scoring='neg_log_loss', t1=None, cv=None, 
 def cross_validate_train(feature_names, cv_split_data, train_df=None, tour_df=None, save_to_drive=False,
                          save_folder=None, plot_metrics=False):
     """
-
     :param feature_names: list with feature names
     :param cv_split_data: list of one of the splitters above
             e.g. time_group_splitter = TimeSeriesSplitGroups(n_splits=4).split(new_training_data, groups=erano_values)
