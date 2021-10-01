@@ -118,4 +118,108 @@ def cvscore(clf, X, y, sample_weight, scoring='neg_log_loss', t1=None, cv=None, 
     return np.array(score)
 
 
+def cross_validate_train(feature_names, cv_split_data, train_df=None, tour_df=None, save_to_drive=False,
+                         save_folder=None, plot_metrics=False):
+    """
 
+    :param feature_names: list with feature names
+    :param cv_split_data: list of one of the splitters above
+            e.g. time_group_splitter = TimeSeriesSplitGroups(n_splits=4).split(new_training_data, groups=erano_values)
+                 cv_split_data = list(time_group_splitter)
+    :param train_df: train dataset that contains training and oos data
+    :param tour_df: validation dataset for metrics visualization
+    :param save_to_drive: True - Save to drive False - Temporarily save
+    :param save_folder: Folder to redirect our models
+    :param plot_metrics: simple sns.barplot of our results
+    :return: doesn't return something
+    """
+    val_corrs_mean_cv = []
+    val_corrs_std_cv = []
+    tour_correlations_mean_cv = []
+    tour_correlations_std_cv = []
+    val_sharpe_cv = []
+    tour_sharpe_cv = []
+
+    predictions_train_total = []
+    predictions_val_total = []
+    predictions_tour_total = []
+
+    cv_count = 0
+
+    for idx_cv in cv_split_data:
+
+        train_data = train_df.iloc[idx_cv[0]]
+        val_data = train_df.iloc[idx_cv[1]]
+
+        # if you want to train on the whole data without keeping any for validation
+        # remember when you use the whole data to not use validation since we haven't kept any data for it
+        # also remember to save to the appropriate folder
+        # train_data = pd.concat([train_data, val_data])
+
+        X_train = train_data[feature_names]
+        y_train = train_data[TARGET_NAME]
+        X_val = val_data[feature_names]
+        y_val = val_data[TARGET_NAME]
+
+        era_lst_train = train_data['era'].unique()
+        era_lst_validation = val_data['era'].unique()
+
+        era_idx_train = [train_data[train_data['era'] == x].index for x in era_lst_train]
+        era_idx_val = [val_data[val_data['era'] == x].index for x in era_lst_validation]
+
+        if tour_df is not None:
+            era_lst_tour = tour_df['era'].unique()
+            era_idx_tour = [tour_df[tour_df['era'] == x].index for x in era_lst_tour]
+
+        print('********************************************************************************************')
+        print("Training model on CV : {} with indixes : {}".format(cv_count, idx_cv))
+        print('********************************************************************************************')
+        model = XGBRegressor(max_depth=5, learning_rate=0.01, n_estimators=1000, n_jobs=-1, colsample_bytree=0.6,
+                             tree_method='gpu_hist', verbosity=0)  # tree_method='gpu_hist',
+        model.fit(X_train, y_train, eval_set=[(X_val, y_val)], early_stopping_rounds=10,
+                  verbose=False)  # , eval_set=[(X_val, y_val)], early_stopping_rounds=10, verbose=False
+
+        if save_to_drive:
+            model.save_model(save_folder + 'model_{}.xgb'.format(cv_count))
+        else:
+            model.save_model('model_{}.xgb'.format(cv_count))
+
+        cv_count += 1
+
+        # predict
+        predictions_train = predict_in_era_batch(model, train_data[feature_names], era_idx=era_idx_train,
+                                                 rank_per_era=True)
+        predictions_val = predict_in_era_batch(model, val_data[feature_names], era_idx=era_idx_val, rank_per_era=True)
+
+        # save to dataframe
+        train_data[PREDICTION_NAME] = predictions_train
+        val_data[PREDICTION_NAME] = predictions_val
+
+        # gather predictions
+        predictions_train_total.append(predictions_train)
+        predictions_val_total.append(predictions_val)
+
+        # do the same for the whole tournament data
+        if tour_df is not None:
+            predictions_tour = predict_in_era_batch(model, tour_df[feature_names], era_idx=era_idx_tour,
+                                                    rank_per_era=True)
+            tour_df[PREDICTION_NAME] = predictions_tour
+            predictions_tour_total.append(predictions_tour)
+
+        # print metrics for this fold
+        metrics = print_metrics_new(train_df=train_data, val_df=val_data, tour_df=tour_df,
+                                    feature_names=feature_names, pred_name=PREDICTION_NAME)
+        val_correlations, tour_correlations, val_sharpe, tour_sharpe = metrics
+
+        if plot_metrics:
+            plot_corrs_per_era_new(df=val_data, pred_name=PREDICTION_NAME)
+            print(120 * '*')
+            plot_corrs_per_era_new(df=tour_df, pred_name=PREDICTION_NAME)
+
+        # average performance of each fold
+        val_corrs_mean_cv.append(val_correlations.mean())
+        val_corrs_std_cv.append(val_correlations.std(ddof=0))
+        # tour_correlations_mean_cv.append(tour_correlations.mean())
+        # tour_correlations_std_cv.append(tour_correlations.std(ddof=0))
+        val_sharpe_cv.append(val_sharpe)
+        # tour_sharpe_cv.append(tour_sharpe)
