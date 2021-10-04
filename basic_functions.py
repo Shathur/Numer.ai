@@ -423,7 +423,7 @@ def print_metrics(train_df=None, val_df=None, tour_df=None, feature_names=None, 
     return [oof_correlations, validation_correlations, oof_sharpe, validation_sharpe]
 
 
-# # get models into a list for iteration on them
+# # get models into a  list for iteration on them
 # def get_model_lst(num_models=1, folder_name=None):
 #     model_lst = []
 #     for cv_num in range(num_models):
@@ -435,7 +435,7 @@ def print_metrics(train_df=None, val_df=None, tour_df=None, feature_names=None, 
 
 # get models into a list for iteration on them
 def get_model_lst(num_models=1, folder_name=None):
-    model_lst = os.listdir(folder_name)
+    model_lst = [folder_name + x for x in os.listdir(folder_name)]
     model_lst_final = model_lst[0:num_models]
     print(model_lst_final)
 
