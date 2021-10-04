@@ -6,6 +6,7 @@ pd.options.mode.chained_assignment = None
 import csv
 import time
 import pickle
+import os
 
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -422,14 +423,23 @@ def print_metrics(train_df=None, val_df=None, tour_df=None, feature_names=None, 
     return [oof_correlations, validation_correlations, oof_sharpe, validation_sharpe]
 
 
+# # get models into a list for iteration on them
+# def get_model_lst(num_models=1, folder_name=None):
+#     model_lst = []
+#     for cv_num in range(num_models):
+#         model_lst.append(folder_name + 'model_{}.xgb'.format(cv_num))
+#     print(model_lst)
+#
+#     return model_lst
+
+
 # get models into a list for iteration on them
 def get_model_lst(num_models=1, folder_name=None):
-    model_lst = []
-    for cv_num in range(num_models):
-        model_lst.append(folder_name + 'model_{}.xgb'.format(cv_num))
-    print(model_lst)
+    model_lst = os.listdir(folder_name)
+    model_lst_final = model_lst[0:num_models]
+    print(model_lst_final)
 
-    return model_lst
+    return model_lst_final
 
 
 # predict in batches. XGBRegressor supported only atm
