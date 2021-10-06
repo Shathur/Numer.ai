@@ -494,7 +494,7 @@ def get_predictions_per_era(df=None, num_models=1, folder_name=None, era_idx=[],
         else:
             predictions_final = np.mean(predictions_total, axis=0)
 
-    return predictions_final
+    return predictions_final.squeeze()
 
 
 # FN on either tournament or validation data
