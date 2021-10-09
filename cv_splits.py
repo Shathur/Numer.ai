@@ -26,8 +26,8 @@ class Random_Splits(_BaseKFold):
         np.random.shuffle(group_lst)
 
         for i in range(self.n_splits):
-            yield (indices[groups.isin(group_lst[i*cutoff_eras: i*cutoff_eras + cutoff_eras])],
-                   indices[groups.isin(group_lst[i*cutoff_eras: i*cutoff_eras + cutoff_eras])])
+            yield (indices[groups.isin(group_lst[i * cutoff_eras: i * cutoff_eras + cutoff_eras])],
+                   indices[groups.isin(group_lst[i * cutoff_eras: i * cutoff_eras + cutoff_eras])])
 
 
 class TimeSeriesSplitGroups(_BaseKFold):
@@ -35,6 +35,7 @@ class TimeSeriesSplitGroups(_BaseKFold):
     Code kindly provided by Michael Oliver in the Numer.ai forum
     https://forum.numer.ai/t/era-wise-time-series-cross-validation/791
     """
+
     def __init__(self, n_splits=None):
         super().__init__(n_splits, shuffle=False, random_state=None)
 
@@ -72,23 +73,24 @@ class PurgedKfold(_BaseKFold):
     t1 : must be a pd.Series
     X and t1 must have the same index values
     """
+
     def __init(self, n_splits=None, t1=None, pctEmbargo=None):
         super(PurgedKfold, self).__init(n_splits, shuffle=False, random_state=None)
-        self.t1=t1
+        self.t1 = t1
         self.pctEmbargo = pctEmbargo
 
     def split(self, X, y=None, groups=None):
-        indices=np.arange(X.shape[0])
-        mbrg=int(X.shape[0].self.pctEmbargo)
-        test_starts = [(i[0], i[-1]+1) for i in np.array_split(np.arange(X.shape[0]), self.n_splits)]
+        indices = np.arange(X.shape[0])
+        mbrg = int(X.shape[0].self.pctEmbargo)
+        test_starts = [(i[0], i[-1] + 1) for i in np.array_split(np.arange(X.shape[0]), self.n_splits)]
 
         for i, j in test_starts:
             t0 = self.t1.index[i]
             test_indices = indices[i: j]
             maxt1idx = self.t1.index.searchsorted(self.t1[test_indices].max())
-            train_indices = self.t1.index.searchsorted(self.t1[self.t1<=t0].index)
-            if maxt1idx<X.shape[0]:
-                train_indices = np.concatenate((train_indices, indices[maxt1idx+mbrg:]))
+            train_indices = self.t1.index.searchsorted(self.t1[self.t1 <= t0].index)
+            if maxt1idx < X.shape[0]:
+                train_indices = np.concatenate((train_indices, indices[maxt1idx + mbrg:]))
             yield train_indices, test_indices
 
 
@@ -105,9 +107,9 @@ def cvscore(clf, X, y, sample_weight, scoring='neg_log_loss', t1=None, cv=None, 
     score = []
 
     for train, test in cvGen.split(X=X):
-        fit=clf.fit(X=X.iloc[train, :], y=y.iloc[train], sample_weight=sample_weight.iloc[train].values)
+        fit = clf.fit(X=X.iloc[train, :], y=y.iloc[train], sample_weight=sample_weight.iloc[train].values)
         if scoring == 'neg_log_loss':
-            prob=fit.predict_proba(X.iloc[test, :])
+            prob = fit.predict_proba(X.iloc[test, :])
             score_ = -log_loss(y.iloc[test], prob, sample_weight=sample_weight.iloc[test].values, labels=clf.classes_)
         else:
             pred = fit.predict(X.iloc[test, :])
@@ -121,16 +123,16 @@ def cvscore(clf, X, y, sample_weight, scoring='neg_log_loss', t1=None, cv=None, 
 def cross_validate_train(feature_names, cv_split_data, train_df=None, tour_df=None, save_to_drive=False,
                          save_folder=None, plot_metrics=False):
     """
-    :param feature_names: list with feature names
-    :param cv_split_data: list of one of the splitters above
-            e.g. time_group_splitter = TimeSeriesSplitGroups(n_splits=4).split(new_training_data, groups=erano_values)
-                 cv_split_data = list(time_group_splitter)
-    :param train_df: train dataset that contains training and oos data
-    :param tour_df: validation dataset for metrics visualization
-    :param save_to_drive: True - Save to drive False - Temporarily save
-    :param save_folder: Folder to redirect our models
-    :param plot_metrics: simple sns.barplot of our results
-    :return: doesn't return something
+    feature_names: list with feature names
+    cv_split_data: list of one of the splitters above
+                    e.g. time_group_splitter = TimeSeriesSplitGroups(n_splits=4).split(new_training_data, groups=erano_values)
+                    cv_split_data = list(time_group_splitter)
+    train_df: train dataset that contains training and oos data
+    tour_df: validation dataset for metrics visualization
+    save_to_drive: True - Save to drive False - Temporarily save
+    save_folder: Folder to redirect our models
+    plot_metrics: simple sns.barplot of our results
+    :return: val_correlations, tour_correlations, val_sharpe_cv, tour_sharpe_cv
     """
     val_corrs_mean_cv = []
     val_corrs_std_cv = []
@@ -218,7 +220,9 @@ def cross_validate_train(feature_names, cv_split_data, train_df=None, tour_df=No
         # average performance of each fold
         val_corrs_mean_cv.append(val_correlations.mean())
         val_corrs_std_cv.append(val_correlations.std(ddof=0))
-        # tour_correlations_mean_cv.append(tour_correlations.mean())
-        # tour_correlations_std_cv.append(tour_correlations.std(ddof=0))
+        tour_correlations_mean_cv.append(tour_correlations.mean())
+        tour_correlations_std_cv.append(tour_correlations.std(ddof=0))
         val_sharpe_cv.append(val_sharpe)
-        # tour_sharpe_cv.append(tour_sharpe)
+        tour_sharpe_cv.append(tour_sharpe)
+
+    return val_correlations, tour_correlations, val_sharpe_cv, tour_sharpe_cv
