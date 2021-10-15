@@ -9,7 +9,8 @@ def plot_corrs_per_era_new(df, pred_name, legend_title):
     val_corrs = corr_score(df, pred_name)
     plt.figure()
     ax = sns.barplot(x=val_corrs.index, y=val_corrs)
-    ax.legend(title=legend_title)
+    if legend_title is not None:
+        ax.legend(title=legend_title)
     plt.show()
 
 
