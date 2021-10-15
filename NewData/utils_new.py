@@ -124,10 +124,6 @@ def plot_feature_neutralization_new(tour_df, neut_percent, full=False,
                                                         feature_exposure(validation_data, PREDICTION_NAME)))
     plt.show()
 
-    val_corrs = corr_score(validation_data, PREDICTION_NAME)
-
-    val_sharpe = sharpe_score(val_corrs)
-
     # Plot the feature exposures with neutralization
     validation_data[PREDICTION_NAME_NEUTRALIZED] = neutralize_short(validation_data,
                                                                     prediction_name=PREDICTION_NAME,
@@ -145,11 +141,6 @@ def plot_feature_neutralization_new(tour_df, neut_percent, full=False,
 
     val_corrs_neut = corr_score(validation_data, PREDICTION_NAME_NEUTRALIZED)
     val_sharpe_neut = sharpe_score(val_corrs_neut)
-
-    # plot and print correlations per era
-    if show_metrics:
-        metrics = print_metrics_new(tour_df=validation_data, pred_name=PREDICTION_NAME,
-                                    feature_names=feature_names, long_metrics=True)
 
     # Plot the feature exposures with neutralization per era
     validation_data[PRED_NAME_NEUT_PER_ERA] = neutralize(
@@ -169,9 +160,6 @@ def plot_feature_neutralization_new(tour_df, neut_percent, full=False,
         max_feature_exposure(validation_data, PRED_NAME_NEUT_PER_ERA),
         feature_exposure(validation_data, PRED_NAME_NEUT_PER_ERA)))
     plt.show()
-
-    val_corrs_neut_per_era = corr_score(validation_data, PRED_NAME_NEUT_PER_ERA)
-    val_sharpe_neut_per_era = sharpe_score(val_corrs_neut_per_era)
 
     # plot and print correlations per era
     if show_metrics:
