@@ -5,8 +5,8 @@ from feature_neutralization import *
 # plot the correlations per era
 # era columns in the new data include
 # just the numbers
-def plot_corrs_per_era_new(df=None, pred_name=None, legend_title=None):
-    val_corrs = corr_score(df, pred_name)
+def plot_corrs_per_era_new(df=None, pred_name=None, target_name=TARGET_NAME, legend_title=None):
+    val_corrs = corr_score(df, pred_name, target_name)
     plt.figure()
     ax = sns.barplot(x=val_corrs.index, y=val_corrs)
     if legend_title is not None:
@@ -15,13 +15,13 @@ def plot_corrs_per_era_new(df=None, pred_name=None, legend_title=None):
 
 
 def print_metrics_new(train_df=None, val_df=None, tour_df=None, feature_names=None,
-                      pred_name=None, long_metrics=True):
+                      pred_name=None, target_name=TARGET_NAME, long_metrics=True):
     # when you print neutralized metrics train_df has to be None cause we don't
     # neutralize our targets on train_df
 
     if train_df is not None:
         # Check the per-era correlations on the training set (in sample)
-        train_correlations = corr_score(train_df, pred_name)
+        train_correlations = corr_score(train_df, pred_name, target_name)
         print(
             f"On training the correlation has mean {train_correlations.mean()} and std {train_correlations.std(ddof=0)}")
     else:
@@ -30,14 +30,14 @@ def print_metrics_new(train_df=None, val_df=None, tour_df=None, feature_names=No
     if val_df is not None:
         '''Out of Fold Validation'''
         # Check the per-era correlations on the oof set (out of fold)
-        oof_correlations = corr_score(val_df, pred_name)
+        oof_correlations = corr_score(val_df, pred_name, target_name)
         print(f"On oof the correlation has mean {oof_correlations.mean()} and "
               f"std {oof_correlations.std(ddof=0)}")
     else:
         oof_correlations = []
 
     if tour_df is not None:
-        validation_correlations = corr_score(tour_df, pred_name)
+        validation_correlations = corr_score(tour_df, pred_name, target_name)
         print(f"On validation the correlation has mean {validation_correlations.mean()} and "
               f"std {validation_correlations.std(ddof=0)}")
     else:
@@ -105,7 +105,7 @@ def print_metrics_new(train_df=None, val_df=None, tour_df=None, feature_names=No
 
 # Feature Neutralization and plot the results
 def plot_feature_neutralization_new(tour_df, neut_percent, full=False,
-                                    feature_names=None, show_metrics=False,
+                                    feature_names=None, target_name=TARGET_NAME, show_metrics=False,
                                     legend_title=None):
     # Will be depracated in future versions and changed with new data validation scheme
     if not full:
@@ -140,7 +140,7 @@ def plot_feature_neutralization_new(tour_df, neut_percent, full=False,
         feature_exposure(validation_data, PREDICTION_NAME_NEUTRALIZED)))
     plt.show()
 
-    val_corrs_neut = corr_score(validation_data, PREDICTION_NAME_NEUTRALIZED)
+    val_corrs_neut = corr_score(validation_data, PREDICTION_NAME_NEUTRALIZED, target_name)
     val_sharpe_neut = sharpe_score(val_corrs_neut)
 
     # Plot the feature exposures with neutralization per era
