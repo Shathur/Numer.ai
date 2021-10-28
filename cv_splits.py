@@ -120,13 +120,14 @@ def cvscore(clf, X, y, sample_weight, scoring='neg_log_loss', t1=None, cv=None, 
     return np.array(score)
 
 
-def cross_validate_train(feature_names, cv_split_data, train_df=None, tour_df=None, save_to_drive=False,
-                         save_folder=None, plot_metrics=False):
+def cross_validate_train(feature_names, cv_split_data, target_name=TARGET_NAME, train_df=None,
+                         tour_df=None, save_to_drive=False, save_folder=None, plot_metrics=False):
     """
     feature_names: list with feature names
     cv_split_data: list of one of the splitters above
                     e.g. time_group_splitter = TimeSeriesSplitGroups(n_splits=4).split(new_training_data, groups=erano_values)
                     cv_split_data = list(time_group_splitter)
+    target_name : target to train on, defaults to TARGET_NAME global
     train_df: train dataset that contains training and oos data
     tour_df: validation dataset for metrics visualization
     save_to_drive: True - Save to drive False - Temporarily save
@@ -158,9 +159,9 @@ def cross_validate_train(feature_names, cv_split_data, train_df=None, tour_df=No
         # train_data = pd.concat([train_data, val_data])
 
         X_train = train_data[feature_names]
-        y_train = train_data[TARGET_NAME]
+        y_train = train_data[target_name]
         X_val = val_data[feature_names]
-        y_val = val_data[TARGET_NAME]
+        y_val = val_data[target_name]
 
         era_lst_train = train_data['era'].unique()
         era_lst_validation = val_data['era'].unique()
