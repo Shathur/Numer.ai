@@ -104,17 +104,17 @@ def load_obj(name):
 
 
 # convenience method for scoring
-def score(df, pred_name):
-    return spearman(df[pred_name], df[TARGET_NAME])
+def score(df, pred_name, target_name=TARGET_NAME):
+    return spearman(df[pred_name], df[target_name])
 
 
 def spearman(y_true, y_pred):
     return spearmanr(y_pred, y_true).correlation
 
 
-def corr_score(df, pred_name):
+def corr_score(df, pred_name, target_name=TARGET_NAME):
     # Check the per-era correlations on the validation set (out of sample)
-    correlations = df.groupby("era").apply(lambda x: score(x, pred_name))
+    correlations = df.groupby("era").apply(lambda x: score(x, pred_name, target_name))
     return correlations
 
 
