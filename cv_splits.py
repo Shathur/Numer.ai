@@ -210,13 +210,14 @@ def cross_validate_train(feature_names, cv_split_data, target_name=TARGET_NAME, 
 
         # print metrics for this fold
         metrics = print_metrics_new(train_df=train_data, val_df=val_data, tour_df=tour_df,
-                                    feature_names=feature_names, pred_name=PREDICTION_NAME)
+                                    feature_names=feature_names, target_name=target_name,
+                                    pred_name=PREDICTION_NAME)
         val_correlations, tour_correlations, val_sharpe, tour_sharpe = metrics
 
         if plot_metrics:
-            plot_corrs_per_era_new(df=val_data, pred_name=PREDICTION_NAME)
+            plot_corrs_per_era_new(df=val_data, pred_name=PREDICTION_NAME, target_name=target_name)
             print(120 * '*')
-            plot_corrs_per_era_new(df=tour_df, pred_name=PREDICTION_NAME)
+            plot_corrs_per_era_new(df=tour_df, pred_name=PREDICTION_NAME, target_name=target_name)
 
         # average performance of each fold
         val_corrs_mean_cv.append(val_correlations.mean())
