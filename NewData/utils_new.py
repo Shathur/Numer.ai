@@ -129,8 +129,6 @@ def run_feature_neutralization_new(df=None, predictions_total=None, target_name=
               'Validation sharpe : {}'.format(val_corrs.mean(), sharpe))
         metrics = print_metrics_new(tour_df=df, pred_name=PREDICTION_NAME, target_name=target_name,
                                 long_metrics=False)
-        metrics = print_metrics_new(tour_df=df, pred_name=PREDICTION_NAME, long_metrics=False,
-                                target_name=target_name, scores_on_val2=True)
 
         # run only for FN
 
@@ -158,8 +156,6 @@ def run_feature_neutralization_new(df=None, predictions_total=None, target_name=
         # for submission purposes, while in the training notebook we neutralize only the validation_data.
         metrics = print_metrics_new(tour_df=df, pred_name=PREDICTION_NAME_NEUTRALIZED, target_name=target_name,
                                     long_metrics=False)
-        metrics = print_metrics_new(tour_df=df, pred_name=PREDICTION_NAME_NEUTRALIZED, long_metrics=False,
-                                    target_name=target_name, scores_on_val2=True)
 
         # Rescale into [0,1] range keeping rank
         minmaxscaler = MinMaxScaler(feature_range=(0, 0.999999))
