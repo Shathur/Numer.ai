@@ -1,14 +1,14 @@
 from basic_functions import *
 from feature_neutralization import *
 
-import basic_functions
+import basic_functions as bf
 
 
 # plot the correlations per era
 # era columns in the new data include
 # just the numbers
 def plot_corrs_per_era_new(df=None, pred_name=None, target_name=TARGET_NAME, legend_title=None):
-    val_corrs = corr_score(df, pred_name, target_name)
+    val_corrs = bf.corr_score(df, pred_name, target_name)
     plt.figure()
     ax = sns.barplot(x=val_corrs.index, y=val_corrs)
     if legend_title is not None:
@@ -27,7 +27,7 @@ def print_metrics_new(train_df=None, val_df=None, tour_df=None, feature_names=No
 
     if train_df is not None:
         # Check the per-era correlations on the training set (in sample)
-        train_correlations = corr_score(train_df, pred_name, target_name)
+        train_correlations = bf.corr_score(train_df, pred_name, target_name)
         print(
             f"On training the correlation has mean {train_correlations.mean()} and std {train_correlations.std(ddof=0)}")
     else:
@@ -36,14 +36,14 @@ def print_metrics_new(train_df=None, val_df=None, tour_df=None, feature_names=No
     if val_df is not None:
         '''Out of Fold Validation'''
         # Check the per-era correlations on the oof set (out of fold)
-        oof_correlations = corr_score(val_df, pred_name, target_name)
+        oof_correlations = bf.corr_score(val_df, pred_name, target_name)
         print(f"On oof the correlation has mean {oof_correlations.mean()} and "
               f"std {oof_correlations.std(ddof=0)}")
     else:
         oof_correlations = []
 
     if tour_df is not None:
-        validation_correlations = corr_score(tour_df, pred_name, target_name)
+        validation_correlations = bf.corr_score(tour_df, pred_name, target_name)
         print(f"On validation the correlation has mean {validation_correlations.mean()} and "
               f"std {validation_correlations.std(ddof=0)}")
     else:
