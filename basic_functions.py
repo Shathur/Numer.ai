@@ -505,8 +505,7 @@ def get_predictions_per_era(df=None, num_models=1, folder_name=None, era_idx=[],
 
 # FN on either tournament or validation data
 def run_feature_neutralization(df=None, predictions_total=None, target_name=TARGET_NAME,
-                               proportion=0.5, neut_type='short', no_fn=False,
-                               metrics_type='legacy'):
+                               proportion=0.5, neut_type='short', no_fn=False):
     assert(neut_type in ['short', 'perera'],
            'Wrong keyword given for neut_type. Needed ''short'' or ''perera'' ')
     if no_fn:
@@ -522,14 +521,10 @@ def run_feature_neutralization(df=None, predictions_total=None, target_name=TARG
         sharpe = sharpe_score(val_corrs)
         print('Validation correlations : {}\n'
               'Validation sharpe : {}'.format(val_corrs.mean(), sharpe))
-        if metrics_type == 'legacy':
-            metrics = print_metrics(tour_df=df, pred_name=PREDICTION_NAME, target_name=target_name,
-                                    long_metrics=False)
-            metrics = print_metrics(tour_df=df, pred_name=PREDICTION_NAME, long_metrics=False,
-                                    target_name=target_name, scores_on_val2=True)
-        else:
-            metrics = print_metrics_new(tour_df=df, pred_name=PREDICTION_NAME,
-                                        target_name=target_name, long_metrics=False)
+        metrics = print_metrics(tour_df=df, pred_name=PREDICTION_NAME, target_name=target_name,
+                                long_metrics=False)
+        metrics = print_metrics(tour_df=df, pred_name=PREDICTION_NAME, long_metrics=False,
+                                target_name=target_name, scores_on_val2=True)
 
         # run only for FN
 
@@ -555,14 +550,10 @@ def run_feature_neutralization(df=None, predictions_total=None, target_name=TARG
 
         # metrics will differ somewhat from training notebook cause here we neutralized the whole tournament_data
         # for submission purposes, while in the training notebook we neutralize only the validation_data.
-        if metrics_type == 'legacy':
-            metrics = print_metrics(tour_df=df, pred_name=PREDICTION_NAME_NEUTRALIZED, target_name=target_name,
-                                    long_metrics=False)
-            metrics = print_metrics(tour_df=df, pred_name=PREDICTION_NAME_NEUTRALIZED, long_metrics=False,
-                                    target_name=target_name, scores_on_val2=True)
-        else:
-            metrics = print_metrics_new(tour_df=df, pred_name=PREDICTION_NAME_NEUTRALIZED,
-                                        target_name=target_name, long_metrics=False)
+        metrics = print_metrics(tour_df=df, pred_name=PREDICTION_NAME_NEUTRALIZED, target_name=target_name,
+                                long_metrics=False)
+        metrics = print_metrics(tour_df=df, pred_name=PREDICTION_NAME_NEUTRALIZED, long_metrics=False,
+                                target_name=target_name, scores_on_val2=True)
 
         # Rescale into [0,1] range keeping rank
         minmaxscaler = MinMaxScaler(feature_range=(0, 0.999999))

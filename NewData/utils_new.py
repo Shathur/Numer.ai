@@ -8,7 +8,7 @@ import basic_functions as bf
 # era columns in the new data include
 # just the numbers
 def plot_corrs_per_era_new(df=None, pred_name=None, target_name=TARGET_NAME, legend_title=None):
-    val_corrs = bf.corr_score(df, pred_name, target_name)
+    val_corrs = corr_score(df, pred_name, target_name)
     plt.figure()
     ax = sns.barplot(x=val_corrs.index, y=val_corrs)
     if legend_title is not None:
@@ -27,7 +27,7 @@ def print_metrics_new(train_df=None, val_df=None, tour_df=None, feature_names=No
 
     if train_df is not None:
         # Check the per-era correlations on the training set (in sample)
-        train_correlations = bf.corr_score(train_df, pred_name, target_name)
+        train_correlations = corr_score(train_df, pred_name, target_name)
         print(
             f"On training the correlation has mean {train_correlations.mean()} and std {train_correlations.std(ddof=0)}")
     else:
@@ -36,7 +36,7 @@ def print_metrics_new(train_df=None, val_df=None, tour_df=None, feature_names=No
     if val_df is not None:
         '''Out of Fold Validation'''
         # Check the per-era correlations on the oof set (out of fold)
-        oof_correlations = bf.corr_score(val_df, pred_name, target_name)
+        oof_correlations = corr_score(val_df, pred_name, target_name)
         print(f"On oof the correlation has mean {oof_correlations.mean()} and "
               f"std {oof_correlations.std(ddof=0)}")
     else:
@@ -107,6 +107,69 @@ def print_metrics_new(train_df=None, val_df=None, tour_df=None, feature_names=No
         print(f"Feature Neutral Mean for validation is {feature_neutral_mean}")
 
     return [oof_correlations, validation_correlations, oof_sharpe, validation_sharpe]
+
+
+# FN on either tournament or validation data
+def run_feature_neutralization_new(df=None, predictions_total=None, target_name=TARGET_NAME,
+                                   proportion=0.5, neut_type='short', no_fn=False):
+    assert(neut_type in ['short', 'perera'],
+           'Wrong keyword given for neut_type. Needed ''short'' or ''perera'' ')
+    if no_fn:
+        preds = predictions_total
+    else:
+        # run only for FN
+        # choose loading from predictions_csv or from models predictions
+        # tournament_data_low_mem[PREDICTION_NAME] = predictions_saved_df['prediction_kazutsugi'] # predictions from csv
+        df[PREDICTION_NAME] = predictions_total  # predictions from model
+
+        validation_data = df[df['data_type'] == 'validation']
+        val_corrs = corr_score(validation_data, PREDICTION_NAME, target_name)
+        sharpe = sharpe_score(val_corrs)
+        print('Validation correlations : {}\n'
+              'Validation sharpe : {}'.format(val_corrs.mean(), sharpe))
+        metrics = print_metrics_new(tour_df=df, pred_name=PREDICTION_NAME, target_name=target_name,
+                                long_metrics=False)
+        metrics = print_metrics_new(tour_df=df, pred_name=PREDICTION_NAME, long_metrics=False,
+                                target_name=target_name, scores_on_val2=True)
+
+        # run only for FN
+
+        # DEFINE FEATURE NEUTRALIZATION PERCENTAGE
+        # CAREFUL THIS IS DIFFERENT BETWEEN SUBMISSIONS
+        # neut_type has to be either 'short' for neutralize_short()
+        #                     either 'perera' for neutralize()
+        if neut_type == 'short':
+            df[PREDICTION_NAME_NEUTRALIZED] = neutralize_short(df,
+                                                               prediction_name=PREDICTION_NAME,
+                                                               proportion=proportion)
+        elif neut_type == 'perera':
+            df[PREDICTION_NAME_NEUTRALIZED] = neutralize(df=df, columns=[PREDICTION_NAME],
+                                                         extra_neutralizers=df.columns[
+                                                             df.columns.str.startswith('feature')],
+                                                         proportion=proportion, normalize=True, era_col='era')
+
+        validation_data = df[df['data_type'] == 'validation']
+        val_corrs = corr_score(validation_data, PREDICTION_NAME_NEUTRALIZED, target_name)
+        sharpe = sharpe_score(val_corrs)
+        print('Validation correlations : {}\n'
+              'Validation sharpe : {}'.format(val_corrs.mean(), sharpe))
+
+        # metrics will differ somewhat from training notebook cause here we neutralized the whole tournament_data
+        # for submission purposes, while in the training notebook we neutralize only the validation_data.
+        metrics = print_metrics_new(tour_df=df, pred_name=PREDICTION_NAME_NEUTRALIZED, target_name=target_name,
+                                    long_metrics=False)
+        metrics = print_metrics_new(tour_df=df, pred_name=PREDICTION_NAME_NEUTRALIZED, long_metrics=False,
+                                    target_name=target_name, scores_on_val2=True)
+
+        # Rescale into [0,1] range keeping rank
+        minmaxscaler = MinMaxScaler(feature_range=(0, 0.999999))
+        minmaxscaler.fit(np.array(df[PREDICTION_NAME_NEUTRALIZED]).reshape(-1, 1))
+        df[PREDICTION_NAME_NEUTRALIZED] = minmaxscaler.transform(
+            np.array(df[PREDICTION_NAME_NEUTRALIZED]).reshape(-1, 1))
+
+        # preds = df[PREDICTION_NAME_NEUTRALIZED].copy()
+        preds = df[PREDICTION_NAME_NEUTRALIZED].values  # np.array of predictions
+    return preds
 
 
 # Feature Neutralization and plot the results
