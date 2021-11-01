@@ -1,7 +1,7 @@
 from basic_functions import *
 from feature_neutralization import *
 
-from basic_functions import corr_score
+from basic_functions import print_metrics
 
 
 # plot the correlations per era
