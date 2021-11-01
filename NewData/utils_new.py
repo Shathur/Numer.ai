@@ -16,8 +16,12 @@ def plot_corrs_per_era_new(df=None, pred_name=None, target_name=TARGET_NAME, leg
 
 def print_metrics_new(train_df=None, val_df=None, tour_df=None, feature_names=None,
                       pred_name=None, target_name=TARGET_NAME, long_metrics=True):
-    # when you print neutralized metrics train_df has to be None cause we don't
-    # neutralize our targets on train_df
+    """
+    When you print neutralized metrics train_df has to be None cause we don't
+    neutralize our targets on train_df
+    feature_names : the columns of the features used. Used only when long_metrics=True,
+                    otherwise can skip
+    """
 
     if train_df is not None:
         # Check the per-era correlations on the training set (in sample)
