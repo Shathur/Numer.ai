@@ -19,6 +19,7 @@ from sklearn.preprocessing import MinMaxScaler
 from xgboost import XGBRegressor
 
 from feature_neutralization import *
+from NewData.utils_new import *
 
 TARGET_NAME = f'target'
 PREDICTION_NAME = f'prediction'
@@ -324,8 +325,13 @@ def plot_feature_neutralization(tour_df, neut_percent, target_name=TARGET_NAME, 
 
 def print_metrics(train_df=None, val_df=None, tour_df=None, feature_names=None, pred_name=None,
                   target_name=TARGET_NAME, long_metrics=True, scores_on_val2=False):
-    # when you print neutralized metrics train_df has to be None cause we don't
-    # neutralize our targets on train_df
+    """
+    When you print neutralized metrics train_df has to be None cause we don't
+    neutralize our targets on train_df
+    feature_names : the columns of the features used. Used only when long_metrics=True,
+                    otherwise can skip
+    scores_on_val2 : Used only for legacy data, to calculate scores on eras 197-212
+    """
 
     if train_df is not None:
         # Check the per-era correlations on the training set (in sample)
