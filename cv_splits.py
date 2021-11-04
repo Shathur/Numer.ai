@@ -121,7 +121,7 @@ def cvscore(clf, X, y, sample_weight, scoring='neg_log_loss', t1=None, cv=None, 
 
 
 def cross_validate_train(feature_names, cv_split_data, target_name=TARGET_NAME, train_df=None,
-                         tour_df=None, save_to_drive=False, save_folder=None, plot_metrics=False):
+                         tour_df=None, type_of_model='xgb', save_to_drive=False, save_folder=None, plot_metrics=False):
     """
     feature_names: list with feature names
     cv_split_data: list of one of the splitters above
@@ -176,15 +176,36 @@ def cross_validate_train(feature_names, cv_split_data, target_name=TARGET_NAME, 
         print('********************************************************************************************')
         print("Training model on CV : {} with indixes : {}".format(cv_count, idx_cv))
         print('********************************************************************************************')
-        model = XGBRegressor(max_depth=5, learning_rate=0.01, n_estimators=1000, n_jobs=-1, colsample_bytree=0.6,
-                             tree_method='gpu_hist', verbosity=0)  # tree_method='gpu_hist',
-        model.fit(X_train, y_train, eval_set=[(X_val, y_val)], early_stopping_rounds=10,
-                  verbose=False)  # , eval_set=[(X_val, y_val)], early_stopping_rounds=10, verbose=False
 
-        if save_to_drive:
-            model.save_model(save_folder + 'model_{}.xgb'.format(cv_count))
+        if type_of_model == 'lgb':
+            lgb_train = lgb.Dataset(X_train.values, y_train.values)
+            lgb_val = lgb.Dataset(X_val.values, y_val.values)
+
+            params = {
+                'n_estimators': 1000,
+                'num_leaves': 2 ** 5,
+                'device': "gpu",
+            }
+
+            model = lgb.train(
+                params,
+                lgb_train,
+                valid_sets=[lgb_val],
+                verbose_eval=100,
+            )
+            if save_to_drive:
+                model.save_model(save_folder + 'model_{}.lgb'.format(cv_count))
+            else:
+                model.save_model('model_{}.lgb'.format(cv_count))
         else:
-            model.save_model('model_{}.xgb'.format(cv_count))
+            model = XGBRegressor(max_depth=5, learning_rate=0.01, n_estimators=1000, n_jobs=-1, colsample_bytree=0.6,
+                                 tree_method='gpu_hist', verbosity=0)  # tree_method='gpu_hist',
+            model.fit(X_train, y_train, eval_set=[(X_val, y_val)], early_stopping_rounds=10,
+                      verbose=False)  # , eval_set=[(X_val, y_val)], early_stopping_rounds=10, verbose=False
+            if save_to_drive:
+                model.save_model(save_folder + 'model_{}.xgb'.format(cv_count))
+            else:
+                model.save_model('model_{}.xgb'.format(cv_count))
 
         cv_count += 1
 
