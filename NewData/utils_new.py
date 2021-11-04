@@ -27,7 +27,7 @@ def print_metrics_new(train_df=None, val_df=None, tour_df=None, feature_names=No
 
     if train_df is not None:
         # Check the per-era correlations on the training set (in sample)
-        train_correlations = corr_score(train_df, pred_name, target_name)
+        train_correlations = bf.corr_score(train_df, pred_name, target_name)
         print(
             f"On training the correlation has mean {train_correlations.mean()} and std {train_correlations.std(ddof=0)}")
     else:
