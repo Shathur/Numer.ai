@@ -130,6 +130,7 @@ def cross_validate_train(feature_names, cv_split_data, target_name=TARGET_NAME, 
     target_name : target to train on, defaults to TARGET_NAME global
     train_df: train dataset that contains training and oos data
     tour_df: validation dataset for metrics visualization
+    type_of_model: the model to be created and used for training - must be 'xgb' or 'lgb'
     save_to_drive: True - Save to drive False - Temporarily save
     save_folder: Folder to redirect our models
     plot_metrics: simple sns.barplot of our results
@@ -177,35 +178,10 @@ def cross_validate_train(feature_names, cv_split_data, target_name=TARGET_NAME, 
         print("Training model on CV : {} with indixes : {}".format(cv_count, idx_cv))
         print('********************************************************************************************')
 
-        if type_of_model == 'lgb':
-            lgb_train = lgb.Dataset(X_train.values, y_train.values)
-            lgb_val = lgb.Dataset(X_val.values, y_val.values)
-
-            params = {
-                'n_estimators': 1000,
-                'num_leaves': 2 ** 5,
-                'device': "gpu",
-            }
-
-            model = lgb.train(
-                params,
-                lgb_train,
-                valid_sets=[lgb_val],
-                verbose_eval=100,
-            )
-            if save_to_drive:
-                model.save_model(save_folder + 'model_{}.lgb'.format(cv_count))
-            else:
-                model.save_model('model_{}.lgb'.format(cv_count))
-        else:
-            model = XGBRegressor(max_depth=5, learning_rate=0.01, n_estimators=1000, n_jobs=-1, colsample_bytree=0.6,
-                                 tree_method='gpu_hist', verbosity=0)  # tree_method='gpu_hist',
-            model.fit(X_train, y_train, eval_set=[(X_val, y_val)], early_stopping_rounds=10,
-                      verbose=False)  # , eval_set=[(X_val, y_val)], early_stopping_rounds=10, verbose=False
-            if save_to_drive:
-                model.save_model(save_folder + 'model_{}.xgb'.format(cv_count))
-            else:
-                model.save_model('model_{}.xgb'.format(cv_count))
+        train_tuple = [X_train, y_train]
+        val_tuple = [X_val, y_val]
+        model = create_model(train_data=train_tuple, val_data=val_tuple, model_type=type_of_model,
+                             save_to_drive=save_to_drive, save_folder=save_folder, cv_count=cv_count)
 
         cv_count += 1
 
