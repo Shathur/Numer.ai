@@ -173,6 +173,8 @@ def cross_validate_train(feature_names, cv_split_data, target_name=TARGET_NAME, 
         if tour_df is not None:
             era_lst_tour = tour_df['era'].unique()
             era_idx_tour = [tour_df[tour_df['era'] == x].index for x in era_lst_tour]
+            # here is also the spot to check the target for Nan and fill them with 0.5
+            tour_df.loc[:, target_name] = tour_df.loc[:, target_name].fillna(0.5)
 
         print('********************************************************************************************')
         print("Training model on CV : {} with indixes : {}".format(cv_count, idx_cv))
