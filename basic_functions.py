@@ -566,3 +566,43 @@ def run_feature_neutralization(df=None, predictions_total=None, target_name=TARG
         # preds = df[PREDICTION_NAME_NEUTRALIZED].copy()
         preds = df[PREDICTION_NAME_NEUTRALIZED].values  # np.array of predictions
     return preds
+
+
+def create_model(train_data=None, val_data=None, model_type='xgb', save_to_drive=False, save_folder=None, cv_count=None):
+    X_train, y_train = train_data
+    X_val, y_val = val_data
+    if model_type == 'lgb':
+        lgb_train = lgb.Dataset(X_train.values, y_train.values)
+        lgb_val = lgb.Dataset(X_val.values, y_val.values)
+
+        params = {
+            'learning_rate': 0.01,
+            'n_estimators': 1000,
+            'num_leaves': 2 ** 5,
+            'max_depth': 5,
+            'colsample_bytree': 0.6,
+            'device': "gpu",
+        }
+
+        model = lgb.train(
+            params,
+            lgb_train,
+            valid_sets=[lgb_val],
+            early_stopping_rounds=10,
+            verbose_eval=100,
+        )
+        if save_to_drive:
+            model.save_model(save_folder + 'model_{}.lgb'.format(cv_count))
+        else:
+            model.save_model('model_{}.lgb'.format(cv_count))
+    else:
+        model = XGBRegressor(max_depth=5, learning_rate=0.01, n_estimators=1000, n_jobs=-1, colsample_bytree=0.6,
+                             tree_method='gpu_hist', verbosity=0)  # tree_method='gpu_hist',
+        model.fit(X_train, y_train, eval_set=[(X_val, y_val)], early_stopping_rounds=10,
+                  verbose=False)  # , eval_set=[(X_val, y_val)], early_stopping_rounds=10, verbose=False
+        if save_to_drive:
+            model.save_model(save_folder + 'model_{}.xgb'.format(cv_count))
+        else:
+            model.save_model('model_{}.xgb'.format(cv_count))
+
+    return model
