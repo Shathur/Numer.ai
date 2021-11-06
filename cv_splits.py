@@ -168,7 +168,10 @@ def cross_validate_train(feature_names, cv_split_data, target_name=TARGET_NAME, 
         era_lst_validation = val_data['era'].unique()
 
         era_idx_train = [train_data[train_data['era'] == x].index for x in era_lst_train]
+        train_data.loc[:, target_name] = train_data.loc[:, target_name].fillna(2)
+
         era_idx_val = [val_data[val_data['era'] == x].index for x in era_lst_validation]
+        val_data.loc[:, target_name] = val_data.loc[:, target_name].fillna(2)
 
         if tour_df is not None:
             era_lst_tour = tour_df['era'].unique()
