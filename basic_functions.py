@@ -451,12 +451,11 @@ def get_model_lst(num_models=1, folder_name=None):
 
 
 # predict in batches. XGBRegressor supported only atm
-def get_predictions(df=None, num_models=1, folder_name=None, batch_size=20000):
+def get_predictions(df=None, num_models=1, folder_name=None, model_type='xgb', batch_size=20000):
     model_lst = get_model_lst(num_models=num_models, folder_name=folder_name)
     predictions_total = []
     for cv_num in range(num_models):
-        model = XGBRegressor(max_depth=5, learning_rate=0.01, n_estimators=1000, n_jobs=-1, colsample_bytree=0.1,
-                             tree_method='gpu_hist', verbosity=0)  # tree_method='gpu_hist',
+        model = create_model(model_type=model_type)
         model.load_model(model_lst[cv_num])
 
         # select the feature columns from the tournament data
@@ -477,13 +476,12 @@ def get_predictions(df=None, num_models=1, folder_name=None, batch_size=20000):
 
 # predict in batches. XGBRegressor supported only atm
 def get_predictions_per_era(df=None, num_models=1, folder_name=None, era_idx=[],
-                            rank_average=False):
+                            model_type='xgb', rank_average=False):
     model_lst = get_model_lst(num_models=num_models, folder_name=folder_name)
     predictions_total = []
 
     for cv_num in range(num_models):
-        model = XGBRegressor(max_depth=5, learning_rate=0.01, n_estimators=1000, n_jobs=-1, colsample_bytree=0.1,
-                             tree_method='gpu_hist', verbosity=0)  # tree_method='gpu_hist',
+        model = create_model(model_type=model_type)
         model.load_model(model_lst[cv_num])
 
         # select the feature columns from the tournament data
@@ -568,13 +566,24 @@ def run_feature_neutralization(df=None, predictions_total=None, target_name=TARG
     return preds
 
 
-def create_model(train_data=None, val_data=None, model_type='xgb', save_to_drive=False, save_folder=None, cv_count=None):
+def run_model(train_data=None, val_data=None, model_type='xgb', save_to_drive=False, save_folder=None, cv_count=None):
     X_train, y_train = train_data
     X_val, y_val = val_data
-    if model_type == 'lgb':
-        lgb_train = lgb.Dataset(X_train.values, y_train.values)
-        lgb_val = lgb.Dataset(X_val.values, y_val.values)
 
+    model = create_model(model_type=model_type)
+
+    model.fit(X_train, y_train, eval_set=[(X_val, y_val)], early_stopping_rounds=10, verbose=False)
+
+    if save_to_drive:
+        model.save_model(save_folder + 'model_{}.lgb'.format(cv_count))
+    else:
+        model.save_model('model_{}.lgb'.format(cv_count))
+
+    return model
+
+
+def create_model(model_type='xgb'):
+    if model_type == 'lgb':
         params = {
             'learning_rate': 0.01,
             'n_estimators': 1000,
@@ -583,26 +592,10 @@ def create_model(train_data=None, val_data=None, model_type='xgb', save_to_drive
             'colsample_bytree': 0.6,
             'device': "gpu",
         }
+        model = lgb.LGBMRegressor(params=params)
 
-        model = lgb.train(
-            params,
-            lgb_train,
-            valid_sets=[lgb_val],
-            early_stopping_rounds=10,
-            verbose_eval=100,
-        )
-        if save_to_drive:
-            model.save_model(save_folder + 'model_{}.lgb'.format(cv_count))
-        else:
-            model.save_model('model_{}.lgb'.format(cv_count))
-    else:
+    if model_type == 'xgb':
         model = XGBRegressor(max_depth=5, learning_rate=0.01, n_estimators=1000, n_jobs=-1, colsample_bytree=0.6,
                              tree_method='gpu_hist', verbosity=0)  # tree_method='gpu_hist',
-        model.fit(X_train, y_train, eval_set=[(X_val, y_val)], early_stopping_rounds=10,
-                  verbose=False)  # , eval_set=[(X_val, y_val)], early_stopping_rounds=10, verbose=False
-        if save_to_drive:
-            model.save_model(save_folder + 'model_{}.xgb'.format(cv_count))
-        else:
-            model.save_model('model_{}.xgb'.format(cv_count))
 
     return model
