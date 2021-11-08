@@ -485,7 +485,7 @@ def get_predictions_per_era(df=None, num_models=1, folder_name=None, era_idx=[],
         if model_type == 'lgb':
             model = lgb.Booster(model_file=model_lst[cv_num])
         if model_type == 'xgb':
-            model == xgb.Booster(model_file=model_lst[cv_num])
+            model = xgb.Booster(model_file=model_lst[cv_num])
         model.load_model(model_lst[cv_num])
 
         # select the feature columns from the tournament data
