@@ -16,6 +16,7 @@ from sklearn import model_selection, metrics
 from scipy.stats import spearmanr
 from sklearn.preprocessing import MinMaxScaler
 
+import xgboost as xgb
 from xgboost import XGBRegressor
 
 import lightgbm as lgb
@@ -481,7 +482,10 @@ def get_predictions_per_era(df=None, num_models=1, folder_name=None, era_idx=[],
     predictions_total = []
 
     for cv_num in range(num_models):
-        model = create_model(model_type=model_type)
+        if model_type == 'lgb':
+            model = lgb.Booster(model_file=model_lst[cv_num])
+        if model_type == 'xgb':
+            model == xgb.Booster(model_file=model_lst[cv_num])
         model.load_model(model_lst[cv_num])
 
         # select the feature columns from the tournament data
