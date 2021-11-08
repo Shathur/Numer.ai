@@ -475,7 +475,7 @@ def get_predictions(df=None, num_models=1, folder_name=None, model_type='xgb', b
     return predictions_total
 
 
-# predict in batches. XGBRegressor supported only atm
+# predict in batches. xgb and lgb supported only atm
 def get_predictions_per_era(df=None, num_models=1, folder_name=None, era_idx=[],
                             model_type='xgb', rank_average=False):
     """
@@ -484,21 +484,24 @@ def get_predictions_per_era(df=None, num_models=1, folder_name=None, era_idx=[],
     :param folder_name: name of the folder
     :param era_idx: indices of dataframe
     :param model_type: xgb or lgb
-    :param rank_average: rank the predictions per era or total ranks in the whole dataframe
+    :param rank_average: True - rank the predictions per era or False -  total ranks in the whole dataframe
     :return: final predictions with proper dimensions for further use
     """
     model_lst = get_model_lst(num_models=num_models, folder_name=folder_name)
     predictions_total = []
 
+    if model_type == 'lgb':
+        # dataframe is good so we keep it
+        X_test = df
+    elif model_type == 'xgb':
+        # need to transform to DMatrix to predict through booster
+        X_test = xgb.DMatrix(df)
+
     for cv_num in range(num_models):
         if model_type == 'lgb':
             model = lgb.Booster(model_file=model_lst[cv_num])
-            # dataframe is good so we keep it
-            X_test = df
         if model_type == 'xgb':
             model = xgb.Booster(model_file=model_lst[cv_num])
-            # need to transform to DMatrix to predict through booster
-            X_test = xgb.DMatrix(df)
         # model.load_model(model_lst[cv_num])
 
         predictions = predict_in_era_batch(model=model,
