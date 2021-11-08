@@ -93,7 +93,7 @@ def load_data():
 
 
 """
-save and load dtypes object for reading csvs with lower memory
+save and load dtypes object for reading objects(csvs, lists, models etc.)
 """
 
 
@@ -526,6 +526,10 @@ def run_feature_neutralization(df=None, predictions_total=None, target_name=TARG
         # run only for FN
         # choose loading from predictions_csv or from models predictions
         # tournament_data_low_mem[PREDICTION_NAME] = predictions_saved_df['prediction_kazutsugi'] # predictions from csv
+
+        # fill Nans
+        df.loc[:, target_name] = df.loc[:, target_name].fillna(0.5)
+
         df[PREDICTION_NAME] = predictions_total  # predictions from model
 
         validation_data = df[df['data_type'] == 'validation']
