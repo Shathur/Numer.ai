@@ -490,19 +490,14 @@ def get_predictions_per_era(df=None, num_models=1, folder_name=None, era_idx=[],
     model_lst = get_model_lst(num_models=num_models, folder_name=folder_name)
     predictions_total = []
 
-    if model_type == 'lgb':
-        # dataframe is good so we keep it
-        X_test = df
-    elif model_type == 'xgb':
-        # need to transform to DMatrix to predict through booster
-        X_test = xgb.DMatrix(df)
+    X_test = df
 
     for cv_num in range(num_models):
         if model_type == 'lgb':
             model = lgb.Booster(model_file=model_lst[cv_num])
         if model_type == 'xgb':
-            model = xgb.Booster(model_file=model_lst[cv_num])
-        # model.load_model(model_lst[cv_num])
+            model = create_model(model_type='xgb')
+            model.load_model(model_lst[cv_num])
 
         predictions = predict_in_era_batch(model=model,
                                            df=X_test,
