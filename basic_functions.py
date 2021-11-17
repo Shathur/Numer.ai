@@ -443,27 +443,31 @@ def print_metrics(train_df=None, val_df=None, tour_df=None, feature_names=None, 
 
 
 # get models into a list for iteration on them
-def get_model_lst(num_models=1, start_idx=0, folder_name=None):
+def get_model_lst(num_models=1, prefix=None, folder_name=None):
     model_lst = [folder_name + x for x in os.listdir(folder_name)]
-    model_lst_final = model_lst[start_idx:num_models]
+    if prefix is not None:
+        model_lst = [x for x in model_lst if x.startswith(folder_name+prefix)]
+    else:
+        pass
+    model_lst_final = model_lst[0:num_models]
     print(model_lst_final)
 
     return model_lst_final
 
 
 # predict in batches. XGBRegressor supported only atm
-def get_predictions(df=None, num_models=1, start_idx=0, folder_name=None, model_type='xgb', batch_size=20000):
+def get_predictions(df=None, num_models=1, prefix=None, folder_name=None, model_type='xgb', batch_size=20000):
     """
 
     :param df: dataframe with the features used to train and predict
     :param num_models: number of models in the folder
-    :param start_idx: place in the folder where returned models start
+    :param prefix: prefix to choose specific models from the folder
     :param folder_name: name of the folder
     :param model_type: xgb or lgb
     :param batch_size: predict in batch_size equal to this number
     :return: np.array with predictions for the df
     """
-    model_lst = get_model_lst(num_models=num_models, start_idx=start_idx, folder_name=folder_name)
+    model_lst = get_model_lst(num_models=num_models, prefix=prefix, folder_name=folder_name)
     predictions_total = []
     for cv_num in range(num_models):
         if model_type == 'lgb':
