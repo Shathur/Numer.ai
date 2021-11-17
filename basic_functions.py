@@ -443,9 +443,9 @@ def print_metrics(train_df=None, val_df=None, tour_df=None, feature_names=None, 
 
 
 # get models into a list for iteration on them
-def get_model_lst(num_models=1, folder_name=None):
+def get_model_lst(num_models=1, start_idx=0, folder_name=None):
     model_lst = [folder_name + x for x in os.listdir(folder_name)]
-    model_lst_final = model_lst[0:num_models]
+    model_lst_final = model_lst[start_idx:num_models]
     print(model_lst_final)
 
     return model_lst_final
@@ -456,8 +456,11 @@ def get_predictions(df=None, num_models=1, folder_name=None, model_type='xgb', b
     model_lst = get_model_lst(num_models=num_models, folder_name=folder_name)
     predictions_total = []
     for cv_num in range(num_models):
-        model = create_model(model_type=model_type)
-        model.load_model(model_lst[cv_num])
+        if model_type == 'lgb':
+            model = lgb.Booster(model_file=model_lst[cv_num])
+        if model_type == 'xgb':
+            model = create_model(model_type='xgb')
+            model.load_model(model_lst[cv_num])
 
         # select the feature columns from the tournament data
         X_test = df
