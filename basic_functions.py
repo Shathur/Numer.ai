@@ -591,9 +591,9 @@ def run_model(train_data=None, val_data=None, model_type='xgb', save_to_drive=Fa
     model.fit(X_train, y_train, eval_set=[(X_val, y_val)], early_stopping_rounds=10, verbose=False)
 
     if save_to_drive:
-        model.save_model(save_folder + 'model_{}.lgb'.format(cv_count))
+        model.save_model(save_folder + 'model_{}.'+model_type.format(cv_count))
     else:
-        model.save_model('model_{}.lgb'.format(cv_count))
+        model.save_model('model_{}.'+model_type.format(cv_count))
 
     return model
 
