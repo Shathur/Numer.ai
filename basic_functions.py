@@ -452,8 +452,18 @@ def get_model_lst(num_models=1, start_idx=0, folder_name=None):
 
 
 # predict in batches. XGBRegressor supported only atm
-def get_predictions(df=None, num_models=1, folder_name=None, model_type='xgb', batch_size=20000):
-    model_lst = get_model_lst(num_models=num_models, folder_name=folder_name)
+def get_predictions(df=None, num_models=1, start_idx=0, folder_name=None, model_type='xgb', batch_size=20000):
+    """
+
+    :param df: dataframe with the features used to train and predict
+    :param num_models: number of models in the folder
+    :param start_idx: place in the folder where returned models start
+    :param folder_name: name of the folder
+    :param model_type: xgb or lgb
+    :param batch_size: predict in batch_size equal to this number
+    :return: np.array with predictions for the df
+    """
+    model_lst = get_model_lst(num_models=num_models, start_idx=start_idx, folder_name=folder_name)
     predictions_total = []
     for cv_num in range(num_models):
         if model_type == 'lgb':
@@ -462,14 +472,9 @@ def get_predictions(df=None, num_models=1, folder_name=None, model_type='xgb', b
             model = create_model(model_type='xgb')
             model.load_model(model_lst[cv_num])
 
-        # select the feature columns from the tournament data
         X_test = df
 
-        # predict in batches to avoid memory issues
-        predictions = []
-        for i in range(0, len(X_test), batch_size):
-            preds = model.predict(X_test[i: i + batch_size])
-            predictions.extend(preds)
+        predictions = predict_in_batch(model, X_test, batch_size)
 
         predictions_total.append(predictions)
 
@@ -482,6 +487,7 @@ def get_predictions(df=None, num_models=1, folder_name=None, model_type='xgb', b
 def get_predictions_per_era(df=None, num_models=1, folder_name=None, era_idx=[],
                             model_type='xgb', rank_average=False):
     """
+
     :param df: dataframe with the features used to train and predict
     :param num_models: number of models in the folder
     :param folder_name: name of the folder
