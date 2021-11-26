@@ -64,7 +64,7 @@ def print_metrics_new(train_df=None, val_df=None, tour_df=None, feature_names=No
     else:
         validation_sharpe = []
 
-    if long_metrics == True:
+    if long_metrics:
         if val_df is not None:
             # Checking the max drowdown of the oof
             rolling_max = (oof_correlations + 1).cumprod().rolling(window=100,
@@ -73,12 +73,13 @@ def print_metrics_new(train_df=None, val_df=None, tour_df=None, feature_names=No
             max_drawdown = -(rolling_max - daily_value).max()
             print(f"max drawdown oof: {max_drawdown}")
 
-        # checking the max drowdown of the validation
-        rolling_max = (validation_correlations + 1).cumprod().rolling(window=100,
-                                                                      min_periods=1).max()
-        daily_value = (validation_correlations + 1).cumprod()
-        max_drawdown = -(rolling_max - daily_value).max()
-        print(f"max drawdown validation: {max_drawdown}")
+        if tour_df is not None:
+            # checking the max drowdown of the validation
+            rolling_max = (validation_correlations + 1).cumprod().rolling(window=100,
+                                                                          min_periods=1).max()
+            daily_value = (validation_correlations + 1).cumprod()
+            max_drawdown = -(rolling_max - daily_value).max()
+            print(f"max drawdown validation: {max_drawdown}")
 
         if val_df is not None:
             # Check the feature exposure of your oof predictions
@@ -89,23 +90,25 @@ def print_metrics_new(train_df=None, val_df=None, tour_df=None, feature_names=No
             max_feature_exposure = max_per_era.mean()
             print(f"Max Feature Exposure for oof: {max_feature_exposure}")
 
-        # Check the feature exposure of your validation predictions
-        # feature_exposures = tour_df[feature_names].apply(
-        #     lambda d: bf.spearman(tour_df[PREDICTION_NAME], d),
-        #     axis=0)
-        max_per_era = tour_df.groupby("era").apply(
-            lambda d: d[feature_names].corrwith(d[PREDICTION_NAME]).abs().max())
-        max_feature_exposure = max_per_era.mean()
-        print(f"Max Feature Exposure for validation: {max_feature_exposure}")
+        if tour_df is not None:
+            # Check the feature exposure of your validation predictions
+            # feature_exposures = tour_df[feature_names].apply(
+            #     lambda d: bf.spearman(tour_df[PREDICTION_NAME], d),
+            #     axis=0)
+            max_per_era = tour_df.groupby("era").apply(
+                lambda d: d[feature_names].corrwith(d[PREDICTION_NAME]).abs().max())
+            max_feature_exposure = max_per_era.mean()
+            print(f"Max Feature Exposure for validation: {max_feature_exposure}")
 
         if val_df is not None:
             # Check feature neutral mean for oof
             feature_neutral_mean = bf.get_feature_neutral_mean(val_df)
             print(f"Feature Neutral Mean for oof is {feature_neutral_mean}")
 
-        # Check feature neutral mean for validation
-        feature_neutral_mean = bf.get_feature_neutral_mean(tour_df)
-        print(f"Feature Neutral Mean for validation is {feature_neutral_mean}")
+        if tour_df is not None:
+            # Check feature neutral mean for validation
+            feature_neutral_mean = bf.get_feature_neutral_mean(tour_df)
+            print(f"Feature Neutral Mean for validation is {feature_neutral_mean}")
 
     return [oof_correlations, validation_correlations, oof_sharpe, validation_sharpe]
 
