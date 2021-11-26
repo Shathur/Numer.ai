@@ -138,8 +138,8 @@ def cross_validate_train(feature_names, cv_split_data, target_name=TARGET_NAME, 
     """
     val_corrs_mean_cv = []
     val_corrs_std_cv = []
-    tour_correlations_mean_cv = []
-    tour_correlations_std_cv = []
+    tour_corrs_mean_cv = []
+    tour_corrs_std_cv = []
     val_sharpe_cv = []
     tour_sharpe_cv = []
 
@@ -228,8 +228,8 @@ def cross_validate_train(feature_names, cv_split_data, target_name=TARGET_NAME, 
         val_sharpe_cv.append(val_sharpe)
 
         if tour_df is not None:
-            tour_correlations_mean_cv.append(tour_correlations.mean())
-            tour_correlations_std_cv.append(tour_correlations.std(ddof=0))
+            tour_corrs_mean_cv.append(tour_correlations.mean())
+            tour_corrs_std_cv.append(tour_correlations.std(ddof=0))
             tour_sharpe_cv.append(tour_sharpe)
         else:
             # tour_correlations is already an empty list from the print_metrics_new function
