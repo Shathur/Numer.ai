@@ -225,9 +225,14 @@ def cross_validate_train(feature_names, cv_split_data, target_name=TARGET_NAME, 
         # average performance of each fold
         val_corrs_mean_cv.append(val_correlations.mean())
         val_corrs_std_cv.append(val_correlations.std(ddof=0))
-        tour_correlations_mean_cv.append(tour_correlations.mean())
-        tour_correlations_std_cv.append(tour_correlations.std(ddof=0))
         val_sharpe_cv.append(val_sharpe)
-        tour_sharpe_cv.append(tour_sharpe)
+
+        if tour_df is not None:
+            tour_correlations_mean_cv.append(tour_correlations.mean())
+            tour_correlations_std_cv.append(tour_correlations.std(ddof=0))
+            tour_sharpe_cv.append(tour_sharpe)
+        else:
+            # tour_correlations is already an empty list from the print_metrics_new function
+            tour_sharpe_cv=None
 
     return val_correlations, tour_correlations, val_sharpe_cv, tour_sharpe_cv
