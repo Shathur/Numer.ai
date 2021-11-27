@@ -461,7 +461,8 @@ def get_predictions(df=None, num_models=1, prefix=None, folder_name=None, model_
 
     :param df: dataframe with the features used to train and predict
     :param num_models: number of models in the folder
-    :param prefix: prefix to choose specific models from the folder
+    :param prefix: prefix to choose specific models from the folder - use it only if you had run a CV scheme
+                   for many different targets or something
     :param folder_name: name of the folder
     :param model_type: xgb or lgb
     :param batch_size: predict in batch_size equal to this number
