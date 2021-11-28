@@ -236,3 +236,17 @@ def cross_validate_train(feature_names, cv_split_data, target_name=TARGET_NAME, 
             tour_sharpe_cv=None
 
     return val_correlations, tour_correlations, val_sharpe_cv, tour_sharpe_cv
+
+
+def cv_split_creator(df, col, n_splits=4):
+    # add another column with date id to feed the cv splitter
+    dateno_values = df[col]
+    df.insert(loc=1, column=col+'_No', value=dateno_values)
+
+    # create TimeSeriesGroupSplit object and use .split to create our folds
+    time_group_splitter = TimeSeriesSplitGroups(n_splits=n_splits).split(df, groups=dateno_values)
+
+    # keep the data in list format
+    cv_split_data = list(time_group_splitter)
+
+    return cv_split_data
