@@ -123,17 +123,18 @@ def cvscore(clf, X, y, sample_weight, scoring='neg_log_loss', t1=None, cv=None, 
 def cross_validate_train(feature_names, cv_split_data, target_name=TARGET_NAME, train_df=None,
                          tour_df=None, type_of_model='xgb', save_to_drive=False, save_folder=None, plot_metrics=False):
     """
-    feature_names: list with feature names
-    cv_split_data: list of one of the splitters above
+
+    :param feature_names: list with feature names
+    :param cv_split_data: list of one of the splitters above
                     e.g. time_group_splitter = TimeSeriesSplitGroups(n_splits=4).split(new_training_data, groups=erano_values)
                     cv_split_data = list(time_group_splitter)
-    target_name : target to train on, defaults to TARGET_NAME global
-    train_df: train dataset that contains training and oos data
-    tour_df: validation dataset for metrics visualization
-    type_of_model: the model to be created and used for training - must be 'xgb' or 'lgb'
-    save_to_drive: True - Save to drive False - Temporarily save
-    save_folder: Folder to redirect our models
-    plot_metrics: simple sns.barplot of our results
+    :param target_name : target to train on, defaults to TARGET_NAME global
+    :param train_df: train dataset that contains training and oos data
+    :param tour_df: validation dataset for metrics visualization
+    :param type_of_model: the model to be created and used for training - must be 'xgb' or 'lgb'
+    :param save_to_drive: True - Save to drive False - Temporarily save
+    :param save_folder: Folder to redirect our models
+    :param plot_metrics: simple sns.barplot of our results
     :return: val_correlations, tour_correlations, val_sharpe_cv, tour_sharpe_cv
     """
     val_corrs_mean_cv = []
