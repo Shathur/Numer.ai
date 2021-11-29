@@ -81,7 +81,7 @@ class PurgedKfold(_BaseKFold):
 
     def split(self, X, y=None, groups=None):
         indices = np.arange(X.shape[0])
-        mbrg = int(X.shape[0].self.pctEmbargo)
+        mbrg = int(X.shape[0]*self.pctEmbargo)
         test_starts = [(i[0], i[-1] + 1) for i in np.array_split(np.arange(X.shape[0]), self.n_splits)]
 
         for i, j in test_starts:
