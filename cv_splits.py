@@ -74,7 +74,7 @@ class PurgedKfold(_BaseKFold):
     X and t1 must have the same index values
     """
 
-    def __init(self, n_splits=None, t1=None, pctEmbargo=None):
+    def __init__(self, n_splits=None, t1=None, pctEmbargo=None):
         super(PurgedKfold, self).__init(n_splits, shuffle=False, random_state=None)
         self.t1 = t1
         self.pctEmbargo = pctEmbargo
