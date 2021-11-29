@@ -148,9 +148,7 @@ def cross_validate_train(feature_names, cv_split_data, target_name=TARGET_NAME, 
     predictions_val_total = []
     predictions_tour_total = []
 
-    cv_count = 0
-
-    for idx_cv in cv_split_data:
+    for cv_count, idx_cv in enumerate(cv_split_data):
 
         train_data = train_df.iloc[idx_cv[0]]
         val_data = train_df.iloc[idx_cv[1]]
@@ -188,8 +186,6 @@ def cross_validate_train(feature_names, cv_split_data, target_name=TARGET_NAME, 
         val_tuple = [X_val, y_val]
         model = run_model(train_data=train_tuple, val_data=val_tuple, model_type=type_of_model,
                           save_to_drive=save_to_drive, save_folder=save_folder, cv_count=cv_count)
-
-        cv_count += 1
 
         # predict
         predictions_train = predict_in_era_batch(model, train_data[feature_names], era_idx=era_idx_train,
