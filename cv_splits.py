@@ -44,7 +44,7 @@ class TimeSeriesSplitGroups(_BaseKFold):
         n_samples = _num_samples(X)
         n_splits = self.n_splits
         n_folds = n_splits + 1
-        group_list = np.unique(groups).tolist()
+        group_list = np.unique(groups)
         n_groups = len(group_list)
         if n_folds > n_groups:
             raise ValueError(
