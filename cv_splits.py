@@ -61,6 +61,37 @@ class TimeSeriesSplitGroups(_BaseKFold):
                    indices[groups.isin(group_list[test_start:test_start + test_size])])
 
 
+class TimeSeriesSplitGroupsPurged(_BaseKFold):
+    """
+    Code kindly provided by Michael Oliver in the Numer.ai forum
+    https://forum.numer.ai/t/era-wise-time-series-cross-validation/791
+    """
+
+    def __init__(self, n_splits=None, embg_grp_num=1):
+        super().__init__(n_splits, shuffle=False, random_state=None)
+
+    def split(self, X, y=None, groups=None):
+        X, y, groups = indexable(X, y, groups)
+        n_samples = _num_samples(X)
+        n_splits = self.n_splits
+        n_folds = n_splits + 1
+        group_list = np.unique(groups)
+        n_groups = len(group_list)
+        if n_folds > n_groups:
+            raise ValueError(
+                ("Cannot have number of folds ={0} greater"
+                 " than the number of samples: {1}.").format(n_folds,
+                                                             n_groups))
+        indices = np.arange(n_samples)
+        test_size = (n_groups // n_folds)
+        test_starts = range(test_size + n_groups % n_folds,
+                            n_groups, test_size)
+        test_starts = list(test_starts)[::-1]
+        for test_start in test_starts:
+            yield (indices[groups.isin(group_list[:test_start])],
+                   indices[groups.isin(group_list[test_start:test_start + test_size])])
+
+
 class PurgedKfold(_BaseKFold):
     """
     Extend KFold class to work with labels that span intervals
@@ -235,10 +266,14 @@ def cross_validate_train(feature_names, cv_split_data, target_name=TARGET_NAME, 
     return val_correlations, tour_correlations, val_sharpe_cv, tour_sharpe_cv
 
 
-def cv_split_creator(df, col, n_splits=4):
+def cv_split_creator(df, col, n_splits=4, is_string=False):
     # add another column with date id to feed the cv splitter
-    dateno_values = df[col]
-    df.insert(loc=1, column=col+'_No', value=dateno_values)
+    if is_string:
+        dateno_values = [int(''.join(i for i in x if i.isdigit())) for x in df[col]]
+        df.insert(loc=1, column=col + '_No', value=dateno_values)
+    else:
+        dateno_values = df[col]
+        df.insert(loc=1, column=col + '_No', value=dateno_values)
 
     # create TimeSeriesGroupSplit object and use .split to create our folds
     time_group_splitter = TimeSeriesSplitGroups(n_splits=n_splits).split(df, groups=dateno_values)
