@@ -66,14 +66,12 @@ def compare(models_lst, round, metric_to_plot):
     return models_df_lst
 
 
-a = compare(['melian', 'ulmo'], 250, 'corr+mmc')
-
-
 class Plotter:
-    def __init__(self, models_lst, round_id, metric_to_plot):
+    def __init__(self, models_lst, round_id, metric_to_plot, horizontal_columns):
         self.models_lst = models_lst
         self.round_id = round_id
         self.metric_to_plot = metric_to_plot
+        self.horizontal_columns = horizontal_columns
 
     @staticmethod
     def fix_format(date):
@@ -98,6 +96,23 @@ class Plotter:
             models_df_lst.append(model_round)
         return models_df_lst
 
+    # def daily_scores(self, model_id, rnd):
+    #     model_daily = napi.daily_submissions_performances(model_id)
+    #     model_daily_df = pd.DataFrame(model_daily)
+    #     # add corr+mmc
+    #     model_daily_df['corr+halfmmc'] = model_daily_df['correlation'] + 0.5*model_daily_df['mmc']
+    #     model_daily_df['corr+mmc'] = model_daily_df['correlation'] + model_daily_df['mmc']
+    #     model_daily_df['corr+2mmc'] = model_daily_df['correlation'] + 2*model_daily_df['mmc']
+    #     model_round = model_daily_df[model_daily_df['roundNumber'] == rnd].reset_index(drop=True)
+    #     model_round['id'] = model_id
+    #     return model_round
+    #
+    # def get_models_df_mixed_lst(self):
+    #     models_df_lst = []
+    #     for model_rnd in self.models_rounds:
+    #         model_round = self.model_daily_scores(model_rnd[0], model_rnd[1])
+    #         models_df_lst.append(model_round)
+        
     def plot_single_round(self):
         models_melted = pd.melt(pd.concat(self.get_models_df_lst()).reset_index(drop=True), id_vars=['id', 'date'],
                                 value_vars=[self.metric_to_plot])
@@ -130,8 +145,15 @@ class Plotter:
 
             count_rnd += 1
 
+    # def plot_subplot_mixed(self):
+    #     models_df_lst = self.get_models_df_lst()
+    #     fig, axes = self.create_subplot_axes()
+    #     print(axes)
+    #     for model_rnd in self.models_rounds:
+
+
     def create_subplot_axes(self):
-        cols_num = 3
+        cols_num = self.horizontal_columns
         if len(self.round_id) % cols_num == 0:
             x_dim = len(self.round_id) // cols_num
             y_dim = cols_num
@@ -145,38 +167,4 @@ class Plotter:
 
         return fig, axes
 
-
-def read_model():
-    stored_csv = pd.read_csv('C:/Users/Ilias/Desktop/Numer.ai/Changes_Lookup_Destination.csv')
-    return stored_csv
-
-xa = read_model()
-xaxa = xa[xa['MODELS']=='melian'].dropna(axis=1)
-change_info = xaxa.iloc[:, -1:].iloc[0,0].split(',')
-
-prev_slot = xa[xa['MODELS']==change_info[2]].dropna(axis=1)
-prev_slot[prev_slot.iloc[0, :].str.contains('melian')]
-prev_slot.loc[:, column.isin(['CHANGE1', 'CHANGE2'])].str.contains('lala')
-
-
-
-
-plotter = Plotter(['melian', 'ulmo'], [250, 251, 255, 256, 263], 'corr+mmc')
-plotter.plot_subplot()
-
-compare(['melian', 'ulmo'], 250, 'corr+mmc')
-
-model_daily = napi.daily_submissions_performances('melian')
-model_daily_df = pd.DataFrame(model_daily)
-model_daily_df.dtypes
-
-for model_id in ['melian', 'ulmo']:
-    model_daily = napi.daily_submissions_performances(model_id)
-    model_daily_df = pd.DataFrame(model_daily)
-    # add corr+mmc
-    model_daily_df['corr+mmc'] = model_daily_df['correlation'] + model_daily_df['mmc']
-    model_round = model_daily_df[model_daily_df['roundNumber'] == 250].reset_index(drop=True)
-    model_round['id'] = model_id
-
-model_round
 
