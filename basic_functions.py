@@ -211,7 +211,7 @@ def plot_feature_exposures(df, pred_name):
 
 
 # plot the correlations per era
-def plot_corrs_per_era(df, pred_name='prediction, target_name='target'):
+def plot_corrs_per_era(df, pred_name='prediction', target_name='target'):
     val_corrs = corr_score(df, pred_name, target_name)
     plt.figure()
     ax = sns.barplot(x=val_corrs.index.str.slice(3), y=val_corrs)
