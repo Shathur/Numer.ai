@@ -8,7 +8,7 @@ import feature_neutralization as fn
 # plot the correlations per era
 # era columns in the new data include
 # just the numbers
-def plot_corrs_per_era_new(df=None, pred_name=None, target_name=TARGET_NAME, legend_title=None):
+def plot_corrs_per_era_new(df=None, pred_name=None, target_name='target', legend_title=None):
     val_corrs = bf.corr_score(df, pred_name, target_name)
     plt.figure()
     ax = sns.barplot(x=val_corrs.index, y=val_corrs)
@@ -18,7 +18,7 @@ def plot_corrs_per_era_new(df=None, pred_name=None, target_name=TARGET_NAME, leg
 
 
 def print_metrics_new(train_df=None, val_df=None, tour_df=None, feature_names=None,
-                      pred_name=None, target_name=TARGET_NAME, long_metrics=True):
+                      pred_name=None, target_name='target', long_metrics=True):
     """
     When you print neutralized metrics train_df has to be None cause we don't
     neutralize our targets on train_df
@@ -114,7 +114,7 @@ def print_metrics_new(train_df=None, val_df=None, tour_df=None, feature_names=No
 
 
 # FN on either tournament or validation data
-def run_feature_neutralization_new(df=None, predictions_total=None, target_name=TARGET_NAME,
+def run_feature_neutralization_new(df=None, predictions_total=None, target_name='target',
                                    pred_name='prediction',
                                    proportion=0.5, neut_type='short', no_fn=False):
     assert (neut_type in ['short', 'perera'],
@@ -181,7 +181,7 @@ def run_feature_neutralization_new(df=None, predictions_total=None, target_name=
 def plot_feature_neutralization_new(tour_df, neut_percent, full=False,
                                     feature_names=None,
                                     pred_name = 'prediction',
-                                    target_name=TARGET_NAME,
+                                    target_name='target',
                                     show_metrics=False,
                                     legend_title=None):
     # Will be depracated in future versions and changed with new data validation scheme
