@@ -63,7 +63,7 @@ def compare(models_lst, round, metric_to_plot):
     plt.xlim(0)
     plt.show()
 
-    return models_df_lst
+    return models_df
 
 
 class Plotter:
@@ -166,5 +166,3 @@ class Plotter:
         # flatten axes dimension to be used as positional arguments
 
         return fig, axes
-
-
