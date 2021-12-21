@@ -268,15 +268,18 @@ def cross_validate_train(feature_names, cv_split_data, target_name=TARGET_NAME, 
 
 def cv_split_creator(df, col, n_splits=4, is_string=False):
     # add another column with date id to feed the cv splitter
-    if is_string:
-        dateno_values = [int(''.join(i for i in x if i.isdigit())) for x in df[col]]
-        # dateno_values need to be pd.Series or pd.DataFrame for our classes to process
-        # them correctly
-        dateno_values = pd.Series(dateno_values)
-        df.insert(loc=1, column=col + '_No', value=dateno_values)
+    if col+'_No' not in df.columns:
+        if is_string:
+            dateno_values = [int(''.join(i for i in x if i.isdigit())) for x in df[col]]
+            # dateno_values need to be pd.Series or pd.DataFrame for our classes to process
+            # them correctly
+            dateno_values = pd.Series(dateno_values)
+            df.insert(loc=1, column=col + '_No', value=dateno_values)
+        else:
+            dateno_values = df[col]
+            df.insert(loc=1, column=col + '_No', value=dateno_values)
     else:
-        dateno_values = df[col]
-        df.insert(loc=1, column=col + '_No', value=dateno_values)
+        dateno_values = df[col+'_No']
 
     # create TimeSeriesGroupSplit object and use .split to create our folds
     time_group_splitter = TimeSeriesSplitGroups(n_splits=n_splits).split(df, groups=dateno_values)
