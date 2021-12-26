@@ -171,7 +171,8 @@ def cvscore(clf, X, y, sample_weight, scoring='neg_log_loss', t1=None, cv=None, 
 
 
 def cross_validate_train(feature_names, cv_split_data, target_name=TARGET_NAME, train_df=None,
-                         tour_df=None, type_of_model='xgb', save_to_drive=False, save_folder=None, plot_metrics=False):
+                         tour_df=None, type_of_model='xgb', save_to_drive=False, save_folder=None,
+                         calculate_metrics=True, plot_metrics=False):
     """
 
     :param feature_names: list with feature names
@@ -184,6 +185,8 @@ def cross_validate_train(feature_names, cv_split_data, target_name=TARGET_NAME, 
     :param type_of_model: the model to be created and used for training - must be 'xgb' or 'lgb'
     :param save_to_drive: True - Save to drive False - Temporarily save
     :param save_folder: Folder to redirect our models
+    :param calculate_metrics: return some basic performance metrics like correlations and sharpe.
+                    If True returns those metrics, if False returns nothing and just saves the models
     :param plot_metrics: simple sns.barplot of our results
     :return: val_correlations, tour_correlations, val_sharpe_cv, tour_sharpe_cv
     """
@@ -237,52 +240,53 @@ def cross_validate_train(feature_names, cv_split_data, target_name=TARGET_NAME, 
         model = run_model(train_data=train_tuple, val_data=val_tuple, model_type=type_of_model,
                           save_to_drive=save_to_drive, save_folder=save_folder, cv_count=cv_count)
 
-        # predict
-        predictions_train = predict_in_era_batch(model, train_data[feature_names], era_idx=era_idx_train,
-                                                 rank_per_era=True)
-        predictions_val = predict_in_era_batch(model, val_data[feature_names], era_idx=era_idx_val, rank_per_era=True)
+        if calculate_metrics:
+            # predict
+            predictions_train = predict_in_era_batch(model, train_data[feature_names], era_idx=era_idx_train,
+                                                     rank_per_era=True)
+            predictions_val = predict_in_era_batch(model, val_data[feature_names], era_idx=era_idx_val, rank_per_era=True)
 
-        # save to dataframe
-        train_data[PREDICTION_NAME] = predictions_train
-        val_data[PREDICTION_NAME] = predictions_val
+            # save to dataframe
+            train_data[PREDICTION_NAME] = predictions_train
+            val_data[PREDICTION_NAME] = predictions_val
 
-        # gather predictions
-        predictions_train_total.append(predictions_train)
-        predictions_val_total.append(predictions_val)
+            # gather predictions
+            predictions_train_total.append(predictions_train)
+            predictions_val_total.append(predictions_val)
 
-        # do the same for the whole tournament data
-        if tour_df is not None:
-            predictions_tour = predict_in_era_batch(model, tour_df[feature_names], era_idx=era_idx_tour,
-                                                    rank_per_era=True)
-            tour_df[PREDICTION_NAME] = predictions_tour
-            predictions_tour_total.append(predictions_tour)
-
-        # print metrics for this fold
-        metrics = print_metrics_new(train_df=train_data, val_df=val_data, tour_df=tour_df,
-                                    feature_names=feature_names, target_name=target_name,
-                                    pred_name=PREDICTION_NAME)
-        val_correlations, tour_correlations, val_sharpe, tour_sharpe = metrics
-
-        if plot_metrics:
-            plot_corrs_per_era_new(df=val_data, pred_name=PREDICTION_NAME, target_name=target_name)
-            print(120 * '*')
+            # do the same for the whole tournament data
             if tour_df is not None:
-                plot_corrs_per_era_new(df=tour_df, pred_name=PREDICTION_NAME, target_name=target_name)
+                predictions_tour = predict_in_era_batch(model, tour_df[feature_names], era_idx=era_idx_tour,
+                                                        rank_per_era=True)
+                tour_df[PREDICTION_NAME] = predictions_tour
+                predictions_tour_total.append(predictions_tour)
 
-        # average performance of each fold
-        val_corrs_mean_cv.append(val_correlations.mean())
-        val_corrs_std_cv.append(val_correlations.std(ddof=0))
-        val_sharpe_cv.append(val_sharpe)
+            # print metrics for this fold
+            metrics = print_metrics_new(train_df=train_data, val_df=val_data, tour_df=tour_df,
+                                        feature_names=feature_names, target_name=target_name,
+                                        pred_name=PREDICTION_NAME)
+            val_correlations, tour_correlations, val_sharpe, tour_sharpe = metrics
 
-        if tour_df is not None:
-            tour_corrs_mean_cv.append(tour_correlations.mean())
-            tour_corrs_std_cv.append(tour_correlations.std(ddof=0))
-            tour_sharpe_cv.append(tour_sharpe)
-        else:
-            # tour_correlations is already an empty list from the print_metrics_new function
-            tour_sharpe_cv=None
+            if plot_metrics:
+                plot_corrs_per_era_new(df=val_data, pred_name=PREDICTION_NAME, target_name=target_name)
+                print(120 * '*')
+                if tour_df is not None:
+                    plot_corrs_per_era_new(df=tour_df, pred_name=PREDICTION_NAME, target_name=target_name)
 
-    return val_correlations, tour_correlations, val_sharpe_cv, tour_sharpe_cv
+            # average performance of each fold
+            val_corrs_mean_cv.append(val_correlations.mean())
+            val_corrs_std_cv.append(val_correlations.std(ddof=0))
+            val_sharpe_cv.append(val_sharpe)
+
+            if tour_df is not None:
+                tour_corrs_mean_cv.append(tour_correlations.mean())
+                tour_corrs_std_cv.append(tour_correlations.std(ddof=0))
+                tour_sharpe_cv.append(tour_sharpe)
+            else:
+                # tour_correlations is already an empty list from the print_metrics_new function
+                tour_sharpe_cv=None
+
+    return val_correlations, tour_correlations, val_sharpe_cv, tour_sharpe_cv if calculate_metrics else [0, 0, 0, 0]
 
 
 def cv_split_creator(df, col, cv_scheme=TimeSeriesSplitGroups, n_splits=4, is_string=False, extra_params={}):
