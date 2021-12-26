@@ -286,7 +286,7 @@ def cross_validate_train(feature_names, cv_split_data, target_name=TARGET_NAME, 
                 # tour_correlations is already an empty list from the print_metrics_new function
                 tour_sharpe_cv=None
 
-    return val_correlations, tour_correlations, val_sharpe_cv, tour_sharpe_cv if calculate_metrics else [0, 0, 0, 0]
+    return [0, 0, 0, 0] if calculate_metrics else val_correlations, tour_correlations, val_sharpe_cv, tour_sharpe_cv
 
 
 def cv_split_creator(df, col, cv_scheme=TimeSeriesSplitGroups, n_splits=4, is_string=False, extra_params={}):
