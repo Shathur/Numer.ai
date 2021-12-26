@@ -285,7 +285,7 @@ def cross_validate_train(feature_names, cv_split_data, target_name=TARGET_NAME, 
     return val_correlations, tour_correlations, val_sharpe_cv, tour_sharpe_cv
 
 
-def cv_split_creator(df, col, cv_scheme='TimeSeriesSplitGroups', n_splits=4, is_string=False, extra_params={}):
+def cv_split_creator(df, col, cv_scheme=TimeSeriesSplitGroups, n_splits=4, is_string=False, extra_params={}):
 
     # add another column with date id to feed the cv splitter
     if col+'_No' not in df.columns:
