@@ -519,11 +519,11 @@ def get_predictions_per_era(df=None, num_models=1, folder_name=None, era_idx=[],
 
         predictions_total.append(predictions)
 
-        if rank_average:
-            scaler = MinMaxScaler(feature_range=(0, 1))
-            predictions_final = scaler.fit_transform(X=np.mean(predictions_total, axis=0).reshape(-1, 1))
-        else:
-            predictions_final = np.mean(predictions_total, axis=0)
+    if rank_average:
+        scaler = MinMaxScaler(feature_range=(0, 1))
+        predictions_final = scaler.fit_transform(X=np.mean(predictions_total, axis=0).reshape(-1, 1))
+    else:
+        predictions_final = np.mean(predictions_total, axis=0)
 
     return predictions_final.squeeze()
 
