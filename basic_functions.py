@@ -443,12 +443,27 @@ def print_metrics(train_df=None, val_df=None, tour_df=None, feature_names=None, 
 
 # get models into a list for iteration on them
 def get_model_lst(num_models=1, prefix=None, folder_name=None):
+    """
+    
+    Parameters
+    ----------
+    num_models: If 0 keep all the models in the folder
+    prefix
+    folder_name
+
+    Returns
+    -------
+
+    """
     model_lst = [folder_name + x for x in os.listdir(folder_name)]
     if prefix is not None:
         model_lst = [x for x in model_lst if x.startswith(folder_name+prefix)]
     else:
         pass
-    model_lst_final = model_lst[0:num_models]
+    if num_models != 0:
+        model_lst_final = model_lst[0:num_models]
+    else:
+        model_lst_final = model_lst
     print(model_lst_final)
 
     return model_lst_final
