@@ -125,6 +125,25 @@ class PurgedKfold(_BaseKFold):
             yield train_indices, test_indices
 
 
+class Windowed_Groups(_BaseKFold):
+    def __init__(self, n_splits=None):
+        super().__init__(n_splits, shuffle=False, random_state=None)
+
+    def split(self, X, y=None, groups=None, window_length=4):
+        X, y, groups = indexable(X, y, groups)
+        n_samples = _num_samples(X)
+        group_lst = np.unique(groups)
+        n_groups = len(group_lst)
+
+        indices = np.arange(n_samples)
+
+        eras = range(n_groups - window_length)
+        eras = list(eras)
+        for i in eras[:]:
+            yield (indices[groups == group_lst[i]],
+                   indices[groups == group_lst[i + window_length]])
+
+
 def cvscore(clf, X, y, sample_weight, scoring='neg_log_loss', t1=None, cv=None, cvGen=None, pctEmbargo=None):
     """
     Alternative to cross_val_score for the PurgedKFold class
