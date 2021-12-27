@@ -611,8 +611,8 @@ def run_feature_neutralization(df=None, predictions_total=None,
     return preds
 
 
-def run_model(train_data=None, val_data=None, model_type='xgb', model_params=None,
-              save_to_drive=False, save_folder=None, cv_count=None):
+def run_model(train_data=None, val_data=None, model_type='xgb', model_params=None, save_to_drive=False,
+              save_folder=None, cv_count=None):
     X_train, y_train = train_data
     X_val, y_val = val_data
 
@@ -628,16 +628,16 @@ def run_model(train_data=None, val_data=None, model_type='xgb', model_params=Non
     return model
 
 
-def create_model(model_type='xgb', params=None):
-    if params is None:
-        params = get_default_params(model_type=model_type)
+def create_model(model_type='xgb', model_params=None):
+    if model_params is None:
+        model_params = get_default_params(model_type=model_type)
     else:
         pass
     if model_type == 'lgb':
-        model = lgb.LGBMRegressor(params=params)
+        model = lgb.LGBMRegressor(params=model_params)
 
     if model_type == 'xgb':
-        model = XGBRegressor(params=params)
+        model = XGBRegressor(params=model_params)
 
     return model
 
