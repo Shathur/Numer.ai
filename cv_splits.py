@@ -171,8 +171,8 @@ def cvscore(clf, X, y, sample_weight, scoring='neg_log_loss', t1=None, cv=None, 
 
 
 def cross_validate_train(feature_names, cv_split_data, target_name=TARGET_NAME, train_df=None,
-                         tour_df=None, type_of_model='xgb', save_to_drive=False, save_folder=None,
-                         calculate_metrics=True, plot_metrics=False):
+                         tour_df=None, type_of_model='xgb', model_params=None, save_to_drive=False,
+                         save_folder=None, calculate_metrics=True, plot_metrics=False):
     """
 
     :param feature_names: list with feature names
@@ -183,12 +183,14 @@ def cross_validate_train(feature_names, cv_split_data, target_name=TARGET_NAME, 
     :param train_df: train dataset that contains training and oos data
     :param tour_df: validation dataset for metrics visualization
     :param type_of_model: the model to be created and used for training - must be 'xgb' or 'lgb'
+    :param model_params: parameters of the model. If None get defaults
     :param save_to_drive: True - Save to drive False - Temporarily save
     :param save_folder: Folder to redirect our models
     :param calculate_metrics: return some basic performance metrics like correlations and sharpe.
                     If True returns those metrics, if False returns nothing and just saves the models
     :param plot_metrics: simple sns.barplot of our results
     :return: val_correlations, tour_correlations, val_sharpe_cv, tour_sharpe_cv
+
     """
     val_corrs_mean_cv = []
     val_corrs_std_cv = []
@@ -238,7 +240,8 @@ def cross_validate_train(feature_names, cv_split_data, target_name=TARGET_NAME, 
         train_tuple = [X_train, y_train]
         val_tuple = [X_val, y_val]
         model = run_model(train_data=train_tuple, val_data=val_tuple, model_type=type_of_model,
-                          save_to_drive=save_to_drive, save_folder=save_folder, cv_count=cv_count)
+                          model_params=model_params, save_to_drive=save_to_drive,
+                          save_folder=save_folder, cv_count=cv_count)
 
         if calculate_metrics:
             # predict
