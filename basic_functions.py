@@ -627,7 +627,11 @@ def run_model(train_data=None, val_data=None, model_type='xgb', save_to_drive=Fa
     return model
 
 
-def create_model(model_type='xgb', params=get_default_params()):
+def create_model(model_type='xgb', params=None):
+    if params is None:
+        params = get_default_params(model_type=model_type)
+    else:
+        pass
     if model_type == 'lgb':
         model = lgb.LGBMRegressor(params=params)
 
