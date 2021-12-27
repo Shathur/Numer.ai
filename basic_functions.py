@@ -444,7 +444,7 @@ def print_metrics(train_df=None, val_df=None, tour_df=None, feature_names=None, 
 # get models into a list for iteration on them
 def get_model_lst(num_models=1, prefix=None, folder_name=None):
     """
-    
+
     Parameters
     ----------
     num_models: If 0 keep all the models in the folder
@@ -627,7 +627,17 @@ def run_model(train_data=None, val_data=None, model_type='xgb', save_to_drive=Fa
     return model
 
 
-def create_model(model_type='xgb'):
+def create_model(model_type='xgb', params=get_default_params()):
+    if model_type == 'lgb':
+        model = lgb.LGBMRegressor(params=params)
+
+    if model_type == 'xgb':
+        model = XGBRegressor(params=params)
+
+    return model
+
+
+def get_default_params(model_type='xgb'):
     if model_type == 'lgb':
         params = {
             'learning_rate': 0.01,
@@ -637,10 +647,15 @@ def create_model(model_type='xgb'):
             'colsample_bytree': 0.6,
             'device': "gpu",
         }
-        model = lgb.LGBMRegressor(params=params)
+    elif model_type == 'xgb':
+        params = {
+            'max_depth' : 5,
+            'learning_rate' : 0.01,
+            'n_estimators' : 1000,
+            'n_jobs' : -1,
+            'colsample_bytree' : 0.6,
+            'tree_method' : 'gpu_hist',
+            'verbosity' : 0
+        }
 
-    if model_type == 'xgb':
-        model = XGBRegressor(max_depth=5, learning_rate=0.01, n_estimators=1000, n_jobs=-1, colsample_bytree=0.6,
-                             tree_method='gpu_hist', verbosity=0)  # tree_method='gpu_hist',
-
-    return model
+    return params
