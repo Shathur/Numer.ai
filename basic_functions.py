@@ -611,11 +611,12 @@ def run_feature_neutralization(df=None, predictions_total=None,
     return preds
 
 
-def run_model(train_data=None, val_data=None, model_type='xgb', save_to_drive=False, save_folder=None, cv_count=None):
+def run_model(train_data=None, val_data=None, model_type='xgb', model_params=None,
+              save_to_drive=False, save_folder=None, cv_count=None):
     X_train, y_train = train_data
     X_val, y_val = val_data
 
-    model = create_model(model_type=model_type)
+    model = create_model(model_type=model_type, model_params=model_params)
 
     model.fit(X_train, y_train, eval_set=[(X_val, y_val)], early_stopping_rounds=10, verbose=False)
 
