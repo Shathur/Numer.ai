@@ -142,7 +142,7 @@ def predict_in_batch(model, df, batch):
 def predict_in_era_batch(model, df, era_idx, rank_per_era):
     """
     rank_per_era=True : returns predictions that are the ranking
-        of our predictions per era
+        of our predictions per era eg.[2,5,4,9,1,6,7,8,3,0]
     rank_per_era=False : returns the predictions of each era,
         concatenated to one another
     """
