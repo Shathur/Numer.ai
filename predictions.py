@@ -224,7 +224,12 @@ def get_predictions_per_era_joblib(df, preds_cache_file=None, num_models=1, pref
             else:
                 predictions_final_era_x = np.mean(predictions_total_era_x, axis=0)
 
-            predictions_total[-len(predictions_final_era_x):] = predictions_final_era_x
+            # transform predictions to list
+            preds_final_era_x = predictions_final_era_x.squeeze().tolist()
+            predictions_final_era_x = preds_final_era_x
+
+            # update only the eraX predictions from the cached list
+            predictions_total[0][-len(predictions_final_era_x):] = predictions_final_era_x
 
     if rank_average:
         scaler = MinMaxScaler(feature_range=(0, 1))
