@@ -144,6 +144,7 @@ def get_predictions_per_era_joblib(df, preds_cache_file=None, num_models=1, pref
 
     model_lst = bf.get_model_lst(num_models=num_models, prefix=prefix, folder_name=folder_name)
     predictions_total = []
+    predictions_total_era_x = []
     for cv_num in tqdm(range(num_models)):
         if cv_num > int(list(cache)[0]):  # check if the model predictions have been saved
             if model_type == 'lgb':
@@ -198,7 +199,6 @@ def get_predictions_per_era_joblib(df, preds_cache_file=None, num_models=1, pref
             # for eraX. We keep everything else the same and we ensemble the predictions
             # for eraX for all models. At the end of each iteration we update
             # the ensemble only for the eraX part of the predictions.
-            predictions_total_era_x = []
             if model_type == 'lgb':
                 model = lgb.Booster(model_file=model_lst[cv_num])
             if model_type == 'xgb':
