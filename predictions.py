@@ -6,7 +6,7 @@ import basic_functions as bf
 import lightgbm as lgb
 from sklearn.preprocessing import MinMaxScaler
 import pickle
-from tqdm import tqdm
+from tqdm.notebook import tqdm
 import os
 
 
