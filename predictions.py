@@ -231,6 +231,15 @@ def get_predictions_per_era_joblib(df, preds_cache_file=None, num_models=1, pref
             # update only the eraX predictions from the cached list
             predictions_total[0][-len(predictions_final_era_x):] = predictions_final_era_x
 
+            # save the already calculated test predictions with the so far
+            # averaged predictions of eraX for models till model no cv_num
+            # save as dictionary. {num_of_aggregated: predictions}
+            # format of the predictions is similar to get_predictions_per_era function
+            cache = {list(cache.keys()[0]): predictions_total[0]}
+            with open(preds_cache_file, 'wb') as file:
+                pickle.dump(cache, file)
+            file.close()
+
     if rank_average:
         scaler = MinMaxScaler(feature_range=(0, 1))
         predictions_final = scaler.fit_transform(X=np.mean(predictions_total, axis=0).reshape(-1, 1))
