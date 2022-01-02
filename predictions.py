@@ -5,6 +5,9 @@ import basic_functions as bf
 
 import lightgbm as lgb
 from sklearn.preprocessing import MinMaxScaler
+import pickle
+from tqdm import tqdm
+import os
 
 
 # predict in batches to avoid memory issues
@@ -37,7 +40,7 @@ def predict_in_era_batch(model, df, era_idx, rank_per_era):
     return predictions
 
 
-# predict in batches. XGBRegressor supported only atm
+# predict in batches. xgb and lgb supported only atm
 def get_predictions(df=None, num_models=1, prefix=None, folder_name=None, model_type='xgb', batch_size=20000):
     """
 
@@ -70,7 +73,7 @@ def get_predictions(df=None, num_models=1, prefix=None, folder_name=None, model_
     return predictions_total
 
 
-# predict in batches. xgb and lgb supported only atm
+# predict in batches on a per-era basis. xgb and lgb supported only atm
 def get_predictions_per_era(df=None, num_models=1, folder_name=None, era_idx=[],
                             model_type='xgb', rank_average=False):
     """
@@ -101,6 +104,127 @@ def get_predictions_per_era(df=None, num_models=1, folder_name=None, era_idx=[],
                                            rank_per_era=rank_average)
 
         predictions_total.append(predictions)
+
+    if rank_average:
+        scaler = MinMaxScaler(feature_range=(0, 1))
+        predictions_final = scaler.fit_transform(X=np.mean(predictions_total, axis=0).reshape(-1, 1))
+    else:
+        predictions_final = np.mean(predictions_total, axis=0)
+
+    return predictions_final.squeeze()
+
+
+def get_predictions_per_era_joblib(df, preds_cache_file=None, num_models=1, prefix=None,
+                                   era_idx=[], era_x_idx=[], model_type='xgb', folder_name=None, rank_average=False):
+    """
+
+    Parameters
+    ----------
+    df: dataframe with the proper columns for predictions
+    preds_cache_file: saved dictionary with the format {num_of_models_predicted: predictions}
+    num_models: number of models in the folder to ensemble predictions
+    prefix: prefix to separate predictions from different training folds eg. 'target_nomi_'
+    era_idx: indices of each era
+    era_x_idx: indices of eraX
+    model_type: choose between xgb or lgb
+    folder_name: folder where models are saved
+    rank_average: True - rank the predictions per era or False -  total ranks in the whole dataframe
+
+    Returns
+    -------
+    predictions: final predictions with proper format
+
+    """
+    if os.path.isfile(preds_cache_file):
+        with open(preds_cache_file, 'rb') as file:
+            cache = pickle.load(file)
+        file.close()
+    else:
+        cache = {-1: []}
+
+    model_lst = bf.get_model_lst(num_models=num_models, prefix=prefix, folder_name=folder_name)
+    predictions_total = []
+    for cv_num in tqdm(range(num_models)):
+        if cv_num > int(list(cache)[0]):  # check if the model predictions have been saved
+            if model_type == 'lgb':
+                model = lgb.Booster(model_file=model_lst[cv_num])
+            if model_type == 'xgb':
+                model = bf.create_model(model_type='xgb')
+                model.load_model(model_lst[cv_num])
+
+            predictions = predict_in_era_batch(model=model,
+                                               df=df,
+                                               era_idx=era_idx,
+                                               rank_per_era=rank_average)
+
+            if rank_average:
+                # predictions are ranks if rank_per_era=True. In every iteration
+                # we gather the predictions that we normalize and the previous
+                # ensembling of prediction which is already normalized.
+                # So we np.array them to transform them into a matrix, we reshape
+                # given matrix with .reshape(-1, 1), we .squeeze() the result to bring
+                # the shape back to our original one and lastly we transform them
+                # back into a list
+                scaler = MinMaxScaler(feature_range=(0, 1))
+                preds = scaler.fit_transform(X=np.array(predictions).reshape(-1, 1)).squeeze().tolist()
+                predictions = preds
+
+            predictions_total.append(predictions)
+
+            if rank_average:
+                scaler = MinMaxScaler(feature_range=(0, 1))
+                predictions_final = scaler.fit_transform(X=np.mean(predictions_total, axis=0).reshape(-1, 1))
+            else:
+                predictions_final = np.mean(predictions_total, axis=0)
+
+            # save as dictionary. {num_of_aggregated: predictions}
+            # format of the predictions is similar to get_predictions_per_era function
+            cache = {cv_num: predictions_final.squeeze()}
+
+            # print(dict(itertools.islice(cache.items(), 10)))
+            # print([value for (key, value) in cache.items()][0][0:10])
+
+            with open(preds_cache_file, 'wb') as file:
+                pickle.dump(cache, file)
+            file.close()
+
+        else:
+            # if loading file, create list then load the aggregated predictions
+            # we keep the values of the dict
+            predictions_total = []
+            predictions_total.append([value for (key, value) in cache.items()][0].tolist())
+
+            # in every model that we have already predicted, we still predict
+            # for eraX. We keep everything else the same and we ensemble the predictions
+            # for eraX for all models. At the end of each iteration we update
+            # the ensemble only for the eraX part of the predictions.
+            predictions_total_era_x = []
+            if model_type == 'lgb':
+                model = lgb.Booster(model_file=model_lst[cv_num])
+            if model_type == 'xgb':
+                model = bf.create_model(model_type='xgb')
+                model.load_model(model_lst[cv_num])
+
+            predictions_era_x = predict_in_era_batch(model=model,
+                                                     df=df,
+                                                     era_idx=era_x_idx,
+                                                     rank_per_era=True)
+
+            if rank_average:
+                scaler = MinMaxScaler(feature_range=(0, 1))
+                preds = scaler.fit_transform(X=np.array(predictions_era_x).reshape(-1, 1)).squeeze().tolist()
+                predictions_era_x = preds
+
+            predictions_total_era_x.append(predictions_era_x)
+
+            if rank_average:
+                scaler = MinMaxScaler(feature_range=(0, 1))
+                predictions_final_era_x = scaler.fit_transform(
+                    X=np.mean(predictions_total_era_x, axis=0).reshape(-1, 1))
+            else:
+                predictions_final_era_x = np.mean(predictions_total_era_x, axis=0)
+
+            predictions_total[-len(predictions_final_era_x):] = predictions_final_era_x
 
     if rank_average:
         scaler = MinMaxScaler(feature_range=(0, 1))
