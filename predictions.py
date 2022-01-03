@@ -74,19 +74,21 @@ def get_predictions(df=None, num_models=1, prefix=None, folder_name=None, model_
 
 
 # predict in batches on a per-era basis. xgb and lgb supported only atm
-def get_predictions_per_era(df=None, num_models=1, folder_name=None, era_idx=[],
+def get_predictions_per_era(df=None, num_models=1, prefix=None, folder_name=None, era_idx=[],
                             model_type='xgb', rank_average=False):
     """
 
     :param df: dataframe with the features used to train and predict
     :param num_models: number of models in the folder
+    :param prefix: prefix to choose specific models from the folder - use it only if you had run a CV scheme
+                   for many different targets or something
     :param folder_name: name of the folder
     :param era_idx: indices of dataframe
     :param model_type: xgb or lgb
     :param rank_average: True - rank the predictions per era or False -  total ranks in the whole dataframe
     :return: final predictions with proper dimensions for further use
     """
-    model_lst = bf.get_model_lst(num_models=num_models, folder_name=folder_name)
+    model_lst = bf.get_model_lst(num_models=num_models, prefix=prefix, folder_name=folder_name)
     predictions_total = []
 
     X_test = df
