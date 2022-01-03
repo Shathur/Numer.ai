@@ -312,8 +312,7 @@ def cv_split_creator(df, col, cv_scheme=TimeSeriesSplitGroups, n_splits=4, is_st
         dateno_values = df[col+'_No']
 
     # create TimeSeriesGroupSplit object and use .split to create our folds
-    time_group_splitter = cv_scheme(n_splits=n_splits, **extra_constructor_params)
-    time_group_splitter = time_group_splitter.split(df, groups=dateno_values, **extra_params)
+    time_group_splitter = cv_scheme(n_splits=n_splits, **extra_constructor_params).split(df, groups=dateno_values, **extra_params)
 
     # keep the data in list format
     cv_split_data = list(time_group_splitter)
