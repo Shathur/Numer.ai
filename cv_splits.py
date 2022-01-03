@@ -30,46 +30,13 @@ class Random_Splits(_BaseKFold):
                    indices[groups.isin(group_lst[i * cutoff_eras: i * cutoff_eras + cutoff_eras])])
 
 
-class TimeSeriesSplitGroupsPurged(_BaseKFold):
+class TimeSeriesSplitGroups(_BaseKFold):
     """
     Code kindly provided by Michael Oliver in the Numer.ai forum
     https://forum.numer.ai/t/era-wise-time-series-cross-validation/791
     """
 
-    def __init__(self, n_splits=None, embg_grp_num=None):
-        super().__init__(n_splits, shuffle=False, random_state=None)
-        self.embg_grp_num = embg_grp_num
-
-    def split(self, X, y=None, groups=None):
-        X, y, groups = indexable(X, y, groups)
-        n_samples = _num_samples(X)
-        n_splits = self.n_splits
-        embg_grp_num = self.embg_grp_num
-        n_folds = n_splits + 1
-        group_list = np.unique(groups)
-        n_groups = len(group_list)
-        if n_folds > n_groups:
-            raise ValueError(
-                ("Cannot have number of folds ={0} greater"
-                 " than the number of samples: {1}.").format(n_folds,
-                                                             n_groups))
-        indices = np.arange(n_samples)
-        test_size = (n_groups // n_folds)
-        test_starts = range(test_size + n_groups % n_folds,
-                            n_groups, test_size)
-        test_starts = list(test_starts)[::-1]
-        for test_start in test_starts:
-            yield (indices[groups.isin(group_list[:test_start-embg_grp_num])],
-                   indices[groups.isin(group_list[test_start+embg_grp_num: test_start+embg_grp_num + test_size])])
-
-
-class TimeSeriesSplitGroupsPurged(_BaseKFold):
-    """
-    Code kindly provided by Michael Oliver in the Numer.ai forum
-    https://forum.numer.ai/t/era-wise-time-series-cross-validation/791
-    """
-
-    def __init__(self, n_splits=None, embg_grp_num=1):
+    def __init__(self, n_splits=None):
         super().__init__(n_splits, shuffle=False, random_state=None)
 
     def split(self, X, y=None, groups=None):
@@ -92,6 +59,39 @@ class TimeSeriesSplitGroupsPurged(_BaseKFold):
         for test_start in test_starts:
             yield (indices[groups.isin(group_list[:test_start])],
                    indices[groups.isin(group_list[test_start:test_start + test_size])])
+
+
+class TimeSeriesSplitGroupsPurged(_BaseKFold):
+    """
+    Code kindly provided by Michael Oliver in the Numer.ai forum
+    https://forum.numer.ai/t/era-wise-time-series-cross-validation/791
+    """
+
+    def __init__(self, n_splits=None, embg_grp_num=None):
+        super().__init__(n_splits,shuffle=False, random_state=None)
+        self.embg_grp_num = embg_grp_num
+
+    def split(self, X, y=None, groups=None):
+        X, y, groups = indexable(X, y, groups)
+        n_samples = _num_samples(X)
+        n_splits = self.n_splits
+        embg_grp_num = self.embg_grp_num
+        n_folds = n_splits + 1
+        group_list = np.unique(groups)
+        n_groups = len(group_list)
+        if n_folds > n_groups:
+            raise ValueError(
+                ("Cannot have number of folds ={0} greater"
+                 " than the number of samples: {1}.").format(n_folds,
+                                                             n_groups))
+        indices = np.arange(n_samples)
+        test_size = (n_groups // n_folds)
+        test_starts = range(test_size + n_groups % n_folds,
+                            n_groups, test_size)
+        test_starts = list(test_starts)[::-1]
+        for test_start in test_starts:
+            yield (indices[groups.isin(group_list[:test_start-embg_grp_num])],
+                   indices[groups.isin(group_list[test_start+embg_grp_num : test_start+embg_grp_num + test_size])])
 
 
 class PurgedKfold(_BaseKFold):
