@@ -4,7 +4,7 @@ from sklearn.model_selection._split import _BaseKFold, indexable, _num_samples
 
 from sklearn.metrics import log_loss, accuracy_score
 
-from basic_functions import *
+import basic_functions as bf
 
 from NewData.utils_new import *
 
@@ -245,9 +245,9 @@ def cross_validate_train(feature_names, cv_split_data, target_name=TARGET_NAME, 
 
         if calculate_metrics:
             # predict
-            predictions_train = predict_in_era_batch(model, train_data[feature_names], era_idx=era_idx_train,
+            predictions_train = bf.predict_in_era_batch(model, train_data[feature_names], era_idx=era_idx_train,
                                                      rank_per_era=True)
-            predictions_val = predict_in_era_batch(model, val_data[feature_names], era_idx=era_idx_val, rank_per_era=True)
+            predictions_val = bf.predict_in_era_batch(model, val_data[feature_names], era_idx=era_idx_val, rank_per_era=True)
 
             # save to dataframe
             train_data[PREDICTION_NAME] = predictions_train
@@ -259,7 +259,7 @@ def cross_validate_train(feature_names, cv_split_data, target_name=TARGET_NAME, 
 
             # do the same for the whole tournament data
             if tour_df is not None:
-                predictions_tour = predict_in_era_batch(model, tour_df[feature_names], era_idx=era_idx_tour,
+                predictions_tour = bf.predict_in_era_batch(model, tour_df[feature_names], era_idx=era_idx_tour,
                                                         rank_per_era=True)
                 tour_df[PREDICTION_NAME] = predictions_tour
                 predictions_tour_total.append(predictions_tour)
