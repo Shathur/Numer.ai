@@ -126,9 +126,9 @@ def sharpe_score(correlations):
 
 
 # get indices corresponding to each era
-def get_era_idx(df):
-    era_lst = df['era'].unique()
-    era_idx = [df[df['era'] == x].index for x in era_lst]
+def get_era_idx(df, col='era'):
+    era_lst = df[col].unique()
+    era_idx = [df[df[col] == x].index for x in era_lst]
     return era_idx
 
 
