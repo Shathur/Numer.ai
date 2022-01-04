@@ -8,6 +8,7 @@ from sklearn.preprocessing import MinMaxScaler
 import pickle
 from tqdm.notebook import tqdm
 import os
+import gc
 
 
 # predict in batches to avoid memory issues
@@ -247,5 +248,7 @@ def get_predictions_per_era_joblib(df, preds_cache_file=None, num_models=1, pref
         predictions_final = scaler.fit_transform(X=np.mean(predictions_total, axis=0).reshape(-1, 1))
     else:
         predictions_final = np.mean(predictions_total, axis=0)
+
+    gc.collect()
 
     return predictions_final.squeeze()
