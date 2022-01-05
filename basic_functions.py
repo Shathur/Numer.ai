@@ -550,13 +550,13 @@ def get_default_params(model_type='xgb'):
         }
     elif model_type == 'xgb':
         params = {
-            'max_depth' : 5,
-            'learning_rate' : 0.01,
-            'n_estimators' : 1000,
-            'n_jobs' : -1,
-            'colsample_bytree' : 0.6,
-            'tree_method' : 'gpu_hist',
-            'verbosity' : 0
+            'max_depth': 5,
+            'learning_rate': 0.01,
+            'n_estimators': 1000,
+            'n_jobs': -1,
+            'colsample_bytree': 0.6,
+            'tree_method': 'gpu_hist',
+            'verbosity': 0
         }
 
     return params
