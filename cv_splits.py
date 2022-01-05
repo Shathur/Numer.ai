@@ -297,14 +297,13 @@ def cross_validate_train(feature_names, cv_split_data, target_name=TARGET_NAME, 
 
 
 def cv_split_creator(df, col, cv_scheme=TimeSeriesSplitGroups, n_splits=4, is_string=False,
-                     extra_constructor_params={}, extra_params={}):
+                     extra_constructor_params={}, extra_params={}, return_col=False):
 
     # add another column with date id to feed the cv splitter
     if col+'_No' not in df.columns:
         if is_string:
             dateno_values = [int(''.join(i for i in x if i.isdigit())) for x in df[col]]
-            # dateno_values need to be pd.Series or pd.DataFrame for our classes to process
-            # them correctly
+            # dateno_values need to be pd.Series or pd.DataFrame
             dateno_values = pd.Series(dateno_values)
             df.insert(loc=1, column=col + '_No', value=dateno_values)
         else:
@@ -319,4 +318,4 @@ def cv_split_creator(df, col, cv_scheme=TimeSeriesSplitGroups, n_splits=4, is_st
     # keep the data in list format
     cv_split_data = list(time_group_splitter)
 
-    return cv_split_data, dateno_values
+    return cv_split_data if not return_col else cv_split_data, dateno_values
