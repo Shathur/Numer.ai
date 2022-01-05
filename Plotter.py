@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
+from matplotlib.colors import ListedColormap
 from datetime import datetime
 
 
@@ -82,9 +83,9 @@ class Plotter:
         model_daily = napi.daily_submissions_performances(model_id)
         model_daily_df = pd.DataFrame(model_daily)
         # add corr+mmc
-        model_daily_df['corr+halfmmc'] = model_daily_df['correlation'] + 0.5*model_daily_df['mmc']
+        model_daily_df['corr+halfmmc'] = model_daily_df['correlation'] + 0.5 * model_daily_df['mmc']
         model_daily_df['corr+mmc'] = model_daily_df['correlation'] + model_daily_df['mmc']
-        model_daily_df['corr+2mmc'] = model_daily_df['correlation'] + 2*model_daily_df['mmc']
+        model_daily_df['corr+2mmc'] = model_daily_df['correlation'] + 2 * model_daily_df['mmc']
         model_round = model_daily_df[model_daily_df['roundNumber'].isin(self.round_id)].reset_index(drop=True)
         model_round['id'] = model_id
         return model_round
@@ -112,7 +113,7 @@ class Plotter:
     #     for model_rnd in self.models_rounds:
     #         model_round = self.model_daily_scores(model_rnd[0], model_rnd[1])
     #         models_df_lst.append(model_round)
-        
+
     def plot_single_round(self):
         models_melted = pd.melt(pd.concat(self.get_models_df_lst()).reset_index(drop=True), id_vars=['id', 'date'],
                                 value_vars=[self.metric_to_plot])
@@ -139,7 +140,7 @@ class Plotter:
             ax = axes.flatten()[count_rnd]
             plt.setp(ax.xaxis.get_majorticklabels(), rotation=45)
             ax.grid(True, axis='both')
-            ax.set_xlim((0, model_rnd.shape[0]//len(self.models_lst)))
+            ax.set_xlim((0, model_rnd.shape[0] // len(self.models_lst)))
             sns.lineplot(ax=ax, x='date', y='value', hue='id', data=models_melted, sort=False)  # hue='variable
             plt.show()
 
@@ -150,7 +151,6 @@ class Plotter:
     #     fig, axes = self.create_subplot_axes()
     #     print(axes)
     #     for model_rnd in self.models_rounds:
-
 
     def create_subplot_axes(self):
         cols_num = self.horizontal_columns
@@ -166,3 +166,25 @@ class Plotter:
         # flatten axes dimension to be used as positional arguments
 
         return fig, axes
+
+    def plot_cv_split(self, df, cv_split_data, dateno_values, cv_scheme, ax=None, n_splits=4, lw=20):
+        if ax is None:
+            fig, ax = plt.subplots(figsize=(12, 6))
+        cmap_cv = plt.cm.coolwarm
+        jet = plt.cm.get_cmap('jet', 256)
+        seq = np.linspace(0, 1, 256)
+        np.random.shuffle(seq)
+        cmap_data = ListedColormap(jet(seq))
+        for ii, (tr, tt) in enumerate(cv_split_data):
+            indices = np.array([np.nan] * len(df))
+            indices[tt] = 1
+            indices[tr] = 0
+            ax.scatter(range(len(indices)), [ii + .5] * len(indices), c=indices, marker='_', lw=lw, cmap=cmap_cv,
+                       vmin=-.2, vmax=1.2)
+        ax.scatter(range(len(df)), [ii + 1.5] * len(df), c=df['target'], marker='_', lw=lw, cmap=plt.cm.Set3)
+        ax.scatter(range(len(df)), [ii + 2.5] * len(df), c=np.array(dateno_values), marker='_', lw=lw, cmap=cmap_data)
+        yticklabels = list(range(n_splits)) + ['target', 'day']
+        ax.set(yticks=np.arange(n_splits + 2) + .5, yticklabels=yticklabels, xlabel='Sample index',
+               ylabel="CV iteration", ylim=[n_splits + 2.2, -.2], xlim=[0, len(df['target'])])
+        ax.set_title('{}'.format(cv_scheme.__name__), fontsize=15)
+        return ax
