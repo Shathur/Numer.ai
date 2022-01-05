@@ -319,4 +319,4 @@ def cv_split_creator(df, col, cv_scheme=TimeSeriesSplitGroups, n_splits=4, is_st
     # keep the data in list format
     cv_split_data = list(time_group_splitter)
 
-    return cv_split_data
+    return cv_split_data, dateno_values
