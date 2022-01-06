@@ -529,11 +529,14 @@ def create_model(model_type='xgb', model_params=None):
         model_params = get_default_params(model_type=model_type)
     else:
         pass
+
     if model_type == 'lgb':
-        model = lgb.LGBMRegressor(params=model_params)
+        model = lgb.LGBMRegressor()
+        model.set_params(**model_params)
 
     if model_type == 'xgb':
-        model = XGBRegressor(params=model_params)
+        model = XGBRegressor()
+        model.set_params(**model_params)
 
     return model
 
