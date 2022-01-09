@@ -244,6 +244,8 @@ def get_predictions_per_era_joblib(df, preds_cache_file=None, num_models=1, pref
                     with open(preds_cache_file, 'wb') as file:
                         pickle.dump(cache, file)
                     file.close()
+                else:
+                    predictions_total_era_x = [predictions_total[0][-len(era_x_idx[0]):]]
 
     if rank_average:
         scaler = MinMaxScaler(feature_range=(0, 1))
