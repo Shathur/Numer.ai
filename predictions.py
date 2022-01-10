@@ -240,6 +240,7 @@ def get_predictions_per_era_joblib(df, preds_cache_file=None, num_models=1, pref
                 if not_first_week:
                     if first_time_new_week:
                         predictions_total[0].extend(predictions_final_era_x)
+                        print(len(predictions_total[0]))
                         first_time_new_week = False
                     else:
                         # update only the eraX predictions from the cached list
@@ -252,6 +253,7 @@ def get_predictions_per_era_joblib(df, preds_cache_file=None, num_models=1, pref
                 # averaged predictions of eraX for models till model no cv_num
                 # save as dictionary. {num_of_aggregated: predictions}
                 # format of the predictions is similar to get_predictions_per_era function
+                print(len(predictions_total[0]))
                 cache = {list(cache.keys())[0]: np.array(predictions_total[0])}
                 with open(preds_cache_file, 'wb') as file:
                     pickle.dump(cache, file)
