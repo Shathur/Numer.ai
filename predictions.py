@@ -118,7 +118,8 @@ def get_predictions_per_era(df=None, num_models=1, prefix=None, folder_name=None
 
 
 def get_predictions_per_era_joblib(df, preds_cache_file=None, num_models=1, prefix=None,
-                                   era_idx=[], era_x_idx=[], model_type='xgb', folder_name=None, rank_average=False):
+                                   era_idx=[], era_x_idx=[], model_type='xgb', folder_name=None,
+                                   rank_average=False, not_first_week=True):
     """
 
     Parameters
@@ -132,12 +133,15 @@ def get_predictions_per_era_joblib(df, preds_cache_file=None, num_models=1, pref
     model_type: choose between xgb or lgb
     folder_name: folder where models are saved
     rank_average: True - rank the predictions per era or False -  total ranks in the whole dataframe
+    not_first_week: boolean
 
     Returns
     -------
     predictions: final predictions with proper format
 
     """
+    first_time_new_week = True
+
     if os.path.isfile(preds_cache_file):
         with open(preds_cache_file, 'rb') as file:
             cache = pickle.load(file)
@@ -199,53 +203,59 @@ def get_predictions_per_era_joblib(df, preds_cache_file=None, num_models=1, pref
             predictions_total.append([value for (key, value) in cache.items()][0].tolist())
 
             if era_x_idx:
-                if len(df) > len(predictions_total[0]): # check that we have calculated for this round
-                    # in every model that we have already predicted, we still predict
-                    # for eraX. We keep everything else the same and we ensemble the predictions
-                    # for eraX for all models. At the end of each iteration we update
-                    # the ensemble only for the eraX part of the predictions.
-                    if model_type == 'lgb':
-                        model = lgb.Booster(model_file=model_lst[cv_num])
-                    if model_type == 'xgb':
-                        model = bf.create_model(model_type='xgb')
-                        model.load_model(model_lst[cv_num])
+                # in every model that we have already predicted, we still predict
+                # for eraX. We keep everything else the same and we ensemble the predictions
+                # for eraX for all models. At the end of each iteration we update
+                # the ensemble only for the eraX part of the predictions.
+                if model_type == 'lgb':
+                    model = lgb.Booster(model_file=model_lst[cv_num])
+                if model_type == 'xgb':
+                    model = bf.create_model(model_type='xgb')
+                    model.load_model(model_lst[cv_num])
 
-                    predictions_era_x = predict_in_era_batch(model=model,
-                                                             df=df,
-                                                             era_idx=era_x_idx,
-                                                             rank_per_era=True)
+                predictions_era_x = predict_in_era_batch(model=model,
+                                                         df=df,
+                                                         era_idx=era_x_idx,
+                                                         rank_per_era=True)
 
-                    if rank_average:
-                        scaler = MinMaxScaler(feature_range=(0, 1))
-                        preds = scaler.fit_transform(X=np.array(predictions_era_x).reshape(-1, 1)).squeeze().tolist()
-                        predictions_era_x = preds
+                if rank_average:
+                    scaler = MinMaxScaler(feature_range=(0, 1))
+                    preds = scaler.fit_transform(X=np.array(predictions_era_x).reshape(-1, 1)).squeeze().tolist()
+                    predictions_era_x = preds
 
-                    predictions_total_era_x.append(predictions_era_x)
+                predictions_total_era_x.append(predictions_era_x)
 
-                    if rank_average:
-                        scaler = MinMaxScaler(feature_range=(0, 1))
-                        predictions_final_era_x = scaler.fit_transform(
-                            X=np.mean(predictions_total_era_x, axis=0).reshape(-1, 1))
-                    else:
-                        predictions_final_era_x = np.mean(predictions_total_era_x, axis=0)
-
-                    # transform predictions to list
-                    preds_final_era_x = predictions_final_era_x.squeeze().tolist()
-                    predictions_final_era_x = preds_final_era_x
-
-                    # update the cached list with the eraX predictions
-                    predictions_total[0].extend(predictions_final_era_x)
-
-                    # save the already calculated test predictions with the so far
-                    # averaged predictions of eraX for models till model no cv_num
-                    # save as dictionary. {num_of_aggregated: predictions}
-                    # format of the predictions is similar to get_predictions_per_era function
-                    cache = {list(cache.keys())[0]: np.array(predictions_total[0])}
-                    with open(preds_cache_file, 'wb') as file:
-                        pickle.dump(cache, file)
-                    file.close()
+                if rank_average:
+                    scaler = MinMaxScaler(feature_range=(0, 1))
+                    predictions_final_era_x = scaler.fit_transform(
+                        X=np.mean(predictions_total_era_x, axis=0).reshape(-1, 1))
                 else:
-                    predictions_total_era_x = [predictions_total[0][-len(era_x_idx[0]):]]
+                    predictions_final_era_x = np.mean(predictions_total_era_x, axis=0)
+
+                # transform predictions to list
+                preds_final_era_x = predictions_final_era_x.squeeze().tolist()
+                predictions_final_era_x = preds_final_era_x
+
+                # update the cached list with the eraX predictions
+                if not_first_week:
+                    if first_time_new_week:
+                        predictions_total[0].extend(predictions_final_era_x)
+                        first_time_new_week = False
+                    else:
+                        # update only the eraX predictions from the cached list
+                        predictions_total[0][-len(predictions_final_era_x):] = predictions_final_era_x
+                else:
+                    # update only the eraX predictions from the cached list
+                    predictions_total[0][-len(predictions_final_era_x):] = predictions_final_era_x
+
+                # save the already calculated test predictions with the so far
+                # averaged predictions of eraX for models till model no cv_num
+                # save as dictionary. {num_of_aggregated: predictions}
+                # format of the predictions is similar to get_predictions_per_era function
+                cache = {list(cache.keys())[0]: np.array(predictions_total[0])}
+                with open(preds_cache_file, 'wb') as file:
+                    pickle.dump(cache, file)
+                file.close()
 
     if rank_average:
         scaler = MinMaxScaler(feature_range=(0, 1))
