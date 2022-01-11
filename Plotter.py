@@ -167,7 +167,7 @@ class Plotter:
 
         return fig, axes
 
-    def plot_cv_split(self, df, cv_split_data, dateno_values, cv_scheme, ax=None, n_splits=4, lw=20):
+    def plot_cv_split(self, df, cv_split_data, dateno_values, cv_scheme, target='target', ax=None, n_splits=4, lw=20):
         if ax is None:
             fig, ax = plt.subplots(figsize=(12, 6))
         cmap_cv = plt.cm.coolwarm
@@ -181,10 +181,10 @@ class Plotter:
             indices[tr] = 0
             ax.scatter(range(len(indices)), [ii + .5] * len(indices), c=indices, marker='_', lw=lw, cmap=cmap_cv,
                        vmin=-.2, vmax=1.2)
-        ax.scatter(range(len(df)), [ii + 1.5] * len(df), c=df['target'], marker='_', lw=lw, cmap=plt.cm.Set3)
+        ax.scatter(range(len(df)), [ii + 1.5] * len(df), c=df[target], marker='_', lw=lw, cmap=plt.cm.Set3)
         ax.scatter(range(len(df)), [ii + 2.5] * len(df), c=np.array(dateno_values), marker='_', lw=lw, cmap=cmap_data)
-        yticklabels = list(range(n_splits)) + ['target', 'day']
+        yticklabels = list(range(n_splits)) + [target, 'day']
         ax.set(yticks=np.arange(n_splits + 2) + .5, yticklabels=yticklabels, xlabel='Sample index',
-               ylabel="CV iteration", ylim=[n_splits + 2.2, -.2], xlim=[0, len(df['target'])])
+               ylabel="CV iteration", ylim=[n_splits + 2.2, -.2], xlim=[0, len(df[target])])
         ax.set_title('{}'.format(cv_scheme.__name__), fontsize=15)
         return ax
