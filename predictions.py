@@ -119,7 +119,7 @@ def get_predictions_per_era(df=None, num_models=1, prefix=None, folder_name=None
 
 def get_predictions_per_era_joblib(df, preds_cache_file=None, num_models=1, prefix=None,
                                    era_idx=[], era_x_idx=[], model_type='xgb', folder_name=None,
-                                   rank_average=False, not_first_week=True):
+                                   rank_average=False, first_week=False):
     """
 
     Parameters
@@ -228,16 +228,16 @@ def get_predictions_per_era_joblib(df, preds_cache_file=None, num_models=1, pref
                 predictions_final_era_x = np.sum(predictions_total_era_x, axis=0)
 
                 # update the cached list with the eraX predictions
-                if not_first_week:
+                if first_week:
+                    # update only the eraX predictions from the cached list
+                    predictions_total[0][-len(predictions_final_era_x):] = predictions_final_era_x
+                else:
                     if first_time_new_week:
                         predictions_total[0].extend(predictions_final_era_x)
                         first_time_new_week = False
                     else:
                         # update only the eraX predictions from the cached list
                         predictions_total[0][-len(predictions_final_era_x):] = predictions_final_era_x
-                else:
-                    # update only the eraX predictions from the cached list
-                    predictions_total[0][-len(predictions_final_era_x):] = predictions_final_era_x
 
                 # save the already calculated test predictions with the so far
                 # averaged predictions of eraX for models till model no cv_num
