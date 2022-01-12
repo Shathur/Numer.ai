@@ -133,7 +133,7 @@ def get_predictions_per_era_joblib(df, preds_cache_file=None, num_models=1, pref
     model_type: choose between xgb or lgb
     folder_name: folder where models are saved
     rank_average: True - rank the predictions per era or False -  total ranks in the whole dataframe
-    not_first_week: boolean
+    first_week: boolean
 
     Returns
     -------
