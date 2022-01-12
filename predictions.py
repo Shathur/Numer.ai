@@ -243,7 +243,6 @@ def get_predictions_per_era_joblib(df, preds_cache_file=None, num_models=1, pref
                 # averaged predictions of eraX for models till model no cv_num
                 # save as dictionary. {num_of_aggregated: predictions}
                 # format of the predictions is similar to get_predictions_per_era function
-                print(predictions_total[0][0:10])
                 cache = {list(cache.keys())[0]: np.array(predictions_total[0])}
                 with open(preds_cache_file, 'wb') as file:
                     pickle.dump(cache, file)
