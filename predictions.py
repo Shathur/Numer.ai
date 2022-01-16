@@ -119,7 +119,7 @@ def get_predictions_per_era(df=None, num_models=1, prefix=None, folder_name=None
 
 def get_predictions_per_era_joblib(df, preds_cache_file=None, num_models=1, prefix=None,
                                    era_idx=[], era_x_idx=[], model_type='xgb', folder_name=None,
-                                   rank_average=False, first_week=False):
+                                   rank_average=False, first_week=False, first_time_new_week=True):
     """
 
     Parameters
@@ -134,13 +134,13 @@ def get_predictions_per_era_joblib(df, preds_cache_file=None, num_models=1, pref
     folder_name: folder where models are saved
     rank_average: True - rank the predictions per era or False -  total ranks in the whole dataframe
     first_week: boolean
+    first_time_new_week: boolean - needed to correctly augment the predictions for the new week
 
     Returns
     -------
     predictions: final predictions with proper format
 
     """
-    first_time_new_week = True
 
     if os.path.isfile(preds_cache_file):
         with open(preds_cache_file, 'rb') as file:
