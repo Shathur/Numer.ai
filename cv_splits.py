@@ -236,7 +236,8 @@ def cross_validate_train(feature_names, cv_split_data, target_name=TARGET_NAME, 
             tour_df.loc[:, target_name] = tour_df.loc[:, target_name].fillna(0.5)
 
         print('********************************************************************************************')
-        print("Training model on CV : {} with indixes : {}".format(cv_count, idx_cv))
+        print("Training model on CV : {} with indices  train: {} to {}".format(cv_count, idx_cv[0][0], idx_cv[0][-1]))
+        print('                                         val: {} to {}'.format(idx_cv[1][0], idx_cv[1][-1]))
         print('********************************************************************************************')
 
         train_tuple = [X_train, y_train]
