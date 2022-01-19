@@ -8,7 +8,7 @@ import feature_neutralization as fn
 # plot the correlations per era
 # era columns in the new data include
 # just the numbers
-def plot_corrs_per_era_new(df=None, pred_name=None, target_name='target', legend_title=None):
+def plot_corrs_per_era_new(df=None, pred_name='prediction', target_name='target', legend_title=None):
     val_corrs = bf.corr_score(df, pred_name, target_name)
     plt.figure()
     ax = sns.barplot(x=val_corrs.index, y=val_corrs)
@@ -18,7 +18,7 @@ def plot_corrs_per_era_new(df=None, pred_name=None, target_name='target', legend
 
 
 def print_metrics_new(train_df=None, val_df=None, tour_df=None, feature_names=None,
-                      pred_name=None, target_name='target', long_metrics=True):
+                      pred_name='prediction', target_name='target', long_metrics=True):
     """
     When you print neutralized metrics train_df has to be None cause we don't
     neutralize our targets on train_df
