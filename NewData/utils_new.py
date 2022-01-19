@@ -14,6 +14,7 @@ def plot_corrs_per_era_new(df=None, pred_name='prediction', target_name='target'
     ax = sns.barplot(x=val_corrs.index, y=val_corrs)
     if legend_title is not None:
         ax.legend(title=legend_title)
+    plt.xticks(rotation=45)
     plt.show()
 
 
