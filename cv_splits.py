@@ -242,9 +242,9 @@ def cross_validate_train(feature_names, cv_split_data, target_name=TARGET_NAME, 
 
         train_tuple = [X_train, y_train]
         val_tuple = [X_val, y_val]
-        model = run_model(train_data=train_tuple, val_data=val_tuple, model_type=type_of_model,
-                          model_params=model_params, save_to_drive=save_to_drive,
-                          save_folder=save_folder, cv_count=cv_count)
+        model = bf.run_model(train_data=train_tuple, val_data=val_tuple, model_type=type_of_model,
+                             model_params=model_params, save_to_drive=save_to_drive,
+                             save_folder=save_folder, cv_count=cv_count)
 
         if calculate_metrics:
             # predict
