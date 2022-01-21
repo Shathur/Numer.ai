@@ -164,6 +164,25 @@ def get_feature_neutral_mean(df, pred_name, target_name):
     return np.mean(scores)
 
 
+def richards_dependence(df, target_col, era_col, prediction_col):
+    scores_by_era = df.groupby(era_col).apply(
+        lambda d: d[[prediction_col, target_col]].corr()[target_col][0]
+    )
+
+    # these need to be ranked within era so "error" makes sense
+    df[prediction_col] = df.groupby(era_col)[prediction_col].rank(pct=True)
+    df[target_col] = df.groupby(era_col)[target_col].rank(pct=True)
+
+    df["era_score"] = df[era_col].map(scores_by_era)
+
+    df["error"] = (df[target_col] - df[prediction_col]) ** 2
+    df["1-error"] = 1 - df["error"]
+
+    # Returns the correlation of the 1-error with the era_score
+    # i.e. how dependent/correlated each prediction is with its era_score
+    return df[["1-error", "era_score"]].corr()
+
+
 # plot the feature exposures
 def plot_feature_exposures(df, pred_name):
     fe = feature_exposures(df, pred_name)
