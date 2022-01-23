@@ -117,9 +117,9 @@ def get_predictions_per_era(df=None, num_models=1, prefix=None, folder_name=None
     return predictions_final.squeeze()
 
 
-def get_predictions_per_era_joblib(df, preds_cache_file=None, num_models=1, prefix=None,
+def get_predictions_per_era_joblib(df, preds_cache_file=None, num_models=1, prefix=None, len_live=None,
                                    era_idx=[], era_x_idx=[], model_type='xgb', folder_name=None,
-                                   rank_average=False, first_week=False, first_time_new_week=True):
+                                   rank_average=False, first_week=False):
     """
 
     Parameters
@@ -128,19 +128,20 @@ def get_predictions_per_era_joblib(df, preds_cache_file=None, num_models=1, pref
     preds_cache_file: saved dictionary with the format {num_of_models_predicted: predictions}
     num_models: number of models in the folder to ensemble predictions
     prefix: prefix to separate predictions from different training folds eg. 'target_nomi_'
+    len_live: the length of live data. When first_week=False it loads the len_live from last week
     era_idx: indices of each era
     era_x_idx: indices of eraX. If not predicting live data leave blank
     model_type: choose between xgb or lgb
     folder_name: folder where models are saved
     rank_average: True - rank the predictions per era or False -  total ranks in the whole dataframe
     first_week: boolean
-    first_time_new_week: boolean - needed to correctly augment the predictions for the new week
 
     Returns
     -------
     predictions: final predictions with proper format
 
     """
+    first_time_new_week = True
 
     if os.path.isfile(preds_cache_file):
         with open(preds_cache_file, 'rb') as file:
@@ -187,7 +188,11 @@ def get_predictions_per_era_joblib(df, preds_cache_file=None, num_models=1, pref
             # save as dictionary. {num_of_aggregated: predictions}
             # format of the predictions is similar to get_predictions_per_era function
             """
-            cache = {cv_num: predictions_final}
+            if len_live:
+                cache = {cv_num: predictions_final,
+                        'len_live': len_live}
+            else:
+                cache = {cv_num: predictions_final}
 
             # print(dict(itertools.islice(cache.items(), 10)))
             # print([value for (key, value) in cache.items()][0][0:10])
@@ -201,6 +206,9 @@ def get_predictions_per_era_joblib(df, preds_cache_file=None, num_models=1, pref
             # we keep the values of the dict
             predictions_total = []
             predictions_total.append([value for (key, value) in cache.items()][0]) #.tolist()
+
+            if len_live:
+                len_live = [value for (key, value) in cache.items()][1]
 
             if era_x_idx:
                 # in every model that we have already predicted, we still predict
@@ -233,6 +241,9 @@ def get_predictions_per_era_joblib(df, preds_cache_file=None, num_models=1, pref
                     predictions_total[0][-len(predictions_final_era_x):] = predictions_final_era_x
                 else:
                     if first_time_new_week:
+                        # predictions_total[0].tolist().extend(predictions_final_era_x)
+                        predictions_old = predictions_total[0][: -len_live]
+                        predictions_total[0] = predictions_old
                         predictions_total[0].tolist().extend(predictions_final_era_x)
                         first_time_new_week = False
                     else:
@@ -243,7 +254,8 @@ def get_predictions_per_era_joblib(df, preds_cache_file=None, num_models=1, pref
                 # averaged predictions of eraX for models till model no cv_num
                 # save as dictionary. {num_of_aggregated: predictions}
                 # format of the predictions is similar to get_predictions_per_era function
-                cache = {list(cache.keys())[0]: np.array(predictions_total[0])}
+                cache = {list(cache.keys())[0]: np.array(predictions_total[0]),
+                         list(cache.keys())[1]: len(predictions_final_era_x)}
                 with open(preds_cache_file, 'wb') as file:
                     pickle.dump(cache, file)
                 file.close()
