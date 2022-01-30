@@ -244,9 +244,10 @@ def get_predictions_per_era_joblib(df, preds_cache_file=None, num_models=1, pref
                         # predictions_total[0].tolist().extend(predictions_final_era_x)
                         predictions_old = predictions_total[0][: -len_live]
                         predictions_total[0] = predictions_old
-                        predictions_total[0].tolist().extend(predictions_final_era_x)
-                        predictions_total[0] = predictions_total[0].tolist().extend(predictions_final_era_x)
+                        # predictions_total[0].tolist().extend(predictions_final_era_x)
+                        # predictions_total[0] = predictions_total[0].tolist().extend(predictions_final_era_x)
                         # predictions_total[0] = np.array(predictions_total[0].tolist().extend(predictions_final_era_x))
+                        predictions_total[0] = np.concatenate((predictions_total[0], predictions_final_era_x), axis=None)
                         first_time_new_week = False
                     else:
                         # update only the eraX predictions from the cached list
