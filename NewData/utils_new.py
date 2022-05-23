@@ -189,7 +189,7 @@ def plot_feature_neutralization_new(tour_df, neut_percent, full=False,
                                     legend_title=None):
     # Will be depracated in future versions and changed with new data validation scheme
     if not full:
-        validation_data = tour_df[tour_df.data_type == "validation"]
+        validation_data = tour_df[tour_df.data_type == "validation"].copy()
     else:
         val2_eras = list(range(197, 213))
         val2_eras = ['era' + str(x) for x in val2_eras]
