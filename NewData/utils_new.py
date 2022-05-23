@@ -183,6 +183,8 @@ def plot_feature_neutralization_new(tour_df, neut_percent, full=False,
                                     feature_names=None,
                                     pred_name='prediction',
                                     target_name='target',
+                                    neutralize_total=False,
+                                    neutralize_per_era=True,
                                     show_metrics=False,
                                     legend_title=None):
     # Will be depracated in future versions and changed with new data validation scheme
@@ -203,42 +205,44 @@ def plot_feature_neutralization_new(tour_df, neut_percent, full=False,
                                                         bf.feature_exposure(validation_data, pred_name)))
     plt.show()
 
-    # Plot the feature exposures with neutralization
-    validation_data[pred_name+'_neutralized'] = fn.neutralize_short(validation_data,
-                                                                       prediction_name=pred_name,
-                                                                       proportion=neut_percent)
+	if neutralize_total:
+		# Plot the feature exposures with neutralization
+		validation_data[pred_name+'_neutralized'] = fn.neutralize_short(validation_data,
+		                                                                   prediction_name=pred_name,
+		                                                                   proportion=neut_percent)
 
-    feat_exps, feats = bf.feature_exposures(validation_data, pred_name+'_neutralized')
+		feat_exps, feats = bf.feature_exposures(validation_data, pred_name+'_neutralized')
 
-    plt.figure()
-    ax1 = sns.barplot(x=feats, y=feat_exps)
-    ax1.legend(title='Max_feature_exposure : {}\n'
-                     'Mean feature exposure : {}'.format(
-        bf.max_feature_exposure(validation_data, pred_name+'_neutralized'),
-        bf.feature_exposure(validation_data, pred_name+'_neutralized')))
-    plt.show()
+		plt.figure()
+		ax1 = sns.barplot(x=feats, y=feat_exps)
+		ax1.legend(title='Max_feature_exposure : {}\n'
+		                 'Mean feature exposure : {}'.format(
+		    bf.max_feature_exposure(validation_data, pred_name+'_neutralized'),
+		    bf.feature_exposure(validation_data, pred_name+'_neutralized')))
+		plt.show()
 
-    val_corrs_neut = bf.corr_score(validation_data, pred_name+'_neutralized', target_name)
-    val_sharpe_neut = bf.sharpe_score(val_corrs_neut)
+		val_corrs_neut = bf.corr_score(validation_data, pred_name+'_neutralized', target_name)
+		val_sharpe_neut = bf.sharpe_score(val_corrs_neut)
+		
+	if neutralize_per_era:
+		# Plot the feature exposures with neutralization per era
+		validation_data[PRED_NAME_NEUT_PER_ERA] = fn.neutralize(
+		    df=validation_data, columns=[pred_name],
+		    extra_neutralizers=feature_names,
+		    proportion=neut_percent, normalize=True, era_col='era')
 
-    # Plot the feature exposures with neutralization per era
-    validation_data[PRED_NAME_NEUT_PER_ERA] = fn.neutralize(
-        df=validation_data, columns=[pred_name],
-        extra_neutralizers=feature_names,
-        proportion=neut_percent, normalize=True, era_col='era')
+		# validation_data[PRED_NAME_NEUT_PER_ERA] = minmax_scale_values(df=validation_data,
+		#                                                               pred_name=PRED_NAME_NEUT_PER_ERA)
 
-    # validation_data[PRED_NAME_NEUT_PER_ERA] = minmax_scale_values(df=validation_data,
-    #                                                               pred_name=PRED_NAME_NEUT_PER_ERA)
+		feat_exps, feats = bf.feature_exposures(validation_data, PRED_NAME_NEUT_PER_ERA)
 
-    feat_exps, feats = bf.feature_exposures(validation_data, PRED_NAME_NEUT_PER_ERA)
-
-    plt.figure()
-    ax1 = sns.barplot(x=feats, y=feat_exps)
-    ax1.legend(title='Max_feature_exposure : {}\n'
-                     'Mean feature exposure : {}'.format(
-        bf.max_feature_exposure(validation_data, PRED_NAME_NEUT_PER_ERA),
-        bf.feature_exposure(validation_data, PRED_NAME_NEUT_PER_ERA)))
-    plt.show()
+		plt.figure()
+		ax1 = sns.barplot(x=feats, y=feat_exps)
+		ax1.legend(title='Max_feature_exposure : {}\n'
+		                 'Mean feature exposure : {}'.format(
+		    bf.max_feature_exposure(validation_data, PRED_NAME_NEUT_PER_ERA),
+		    bf.feature_exposure(validation_data, PRED_NAME_NEUT_PER_ERA)))
+		plt.show()
 
     # plot and print correlations per era
     if show_metrics:
@@ -251,23 +255,26 @@ def plot_feature_neutralization_new(tour_df, neut_percent, full=False,
     else:
         plot_corrs_per_era_new(validation_data, pred_name)
 
-    if show_metrics:
-        metrics = print_metrics_new(tour_df=validation_data,
-                                    pred_name=pred_name+'_neutralized',
-                                    feature_names=feature_names,
-                                    long_metrics=True)
-    if legend_title is not None:
-        plot_corrs_per_era_new(validation_data, pred_name+'_neutralized', legend_title[1])
-    else:
-        plot_corrs_per_era_new(validation_data, pred_name + '_neutralized')
 
-    if show_metrics:
-        metrics = print_metrics_new(tour_df=validation_data,
-                                    pred_name=PRED_NAME_NEUT_PER_ERA,
-                                    feature_names=feature_names,
-                                    long_metrics=True)
+	if neutralize_total:
+		if show_metrics:
+		    metrics = print_metrics_new(tour_df=validation_data,
+		                                pred_name=pred_name+'_neutralized',
+		                                feature_names=feature_names,
+		                                long_metrics=True)                            
+		if legend_title is not None:
+		    plot_corrs_per_era_new(validation_data, pred_name+'_neutralized', legend_title[1])
+		else:
+		    plot_corrs_per_era_new(validation_data, pred_name + '_neutralized')
 
-    if legend_title is not None:
-        plot_corrs_per_era_new(validation_data, PRED_NAME_NEUT_PER_ERA, legend_title[2])
-    else:
-        plot_corrs_per_era_new(validation_data, PRED_NAME_NEUT_PER_ERA)
+	if neutralize_per_era:
+		if show_metrics:
+			metrics = print_metrics_new(tour_df=validation_data,
+					                    pred_name=PRED_NAME_NEUT_PER_ERA,
+					                    feature_names=feature_names,
+					                    long_metrics=True)
+		if legend_title is not None:
+			plot_corrs_per_era_new(validation_data, PRED_NAME_NEUT_PER_ERA, legend_title[2])
+		else:
+			plot_corrs_per_era_new(validation_data, PRED_NAME_NEUT_PER_ERA)
+
