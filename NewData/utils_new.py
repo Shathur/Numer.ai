@@ -147,34 +147,34 @@ def run_feature_neutralization_new(df=None, predictions_total=None, target_name=
         # neut_type has to be either 'short' for neutralize_short()
         #                     either 'perera' for neutralize()
         if neut_type == 'short':
-            df[pred_name+'_neutralized'] = fn.neutralize_short(df,
-                                                                  prediction_name=pred_name,
-                                                                  proportion=proportion)
+            df[pred_name + '_neutralized'] = fn.neutralize_short(df,
+                                                                 prediction_name=pred_name,
+                                                                 proportion=proportion)
         elif neut_type == 'perera':
-            df[pred_name+'_neutralized'] = fn.neutralize(df=df, columns=[pred_name],
-                                                            extra_neutralizers=df.columns[
-                                                                df.columns.str.startswith('feature')],
-                                                            proportion=proportion, normalize=True, era_col='era')
+            df[pred_name + '_neutralized'] = fn.neutralize(df=df, columns=[pred_name],
+                                                           extra_neutralizers=df.columns[
+                                                               df.columns.str.startswith('feature')],
+                                                           proportion=proportion, normalize=True, era_col='era')
 
         validation_data = df[df['data_type'] == 'validation']
-        val_corrs = bf.corr_score(validation_data, pred_name+'_neutralized', target_name)
+        val_corrs = bf.corr_score(validation_data, pred_name + '_neutralized', target_name)
         sharpe = bf.sharpe_score(val_corrs)
         print('Validation correlations : {}\n'
               'Validation sharpe : {}'.format(val_corrs.mean(), sharpe))
 
         # metrics will differ somewhat from training notebook cause here we neutralized the whole tournament_data
         # for submission purposes, while in the training notebook we neutralize only the validation_data.
-        metrics = print_metrics_new(tour_df=df, pred_name=pred_name+'_neutralized', target_name=target_name,
+        metrics = print_metrics_new(tour_df=df, pred_name=pred_name + '_neutralized', target_name=target_name,
                                     long_metrics=False)
 
         # Rescale into [0,1] range keeping rank
         minmaxscaler = MinMaxScaler(feature_range=(0, 0.999999))
-        minmaxscaler.fit(np.array(df[pred_name+'_neutralized']).reshape(-1, 1))
-        df[pred_name+'_neutralized'] = minmaxscaler.transform(
-            np.array(df[pred_name+'_neutralized']).reshape(-1, 1))
+        minmaxscaler.fit(np.array(df[pred_name + '_neutralized']).reshape(-1, 1))
+        df[pred_name + '_neutralized'] = minmaxscaler.transform(
+            np.array(df[pred_name + '_neutralized']).reshape(-1, 1))
 
         # preds = df[pred_name+'_neutralized'].copy()
-        preds = df[pred_name+'_neutralized'].values  # np.array of predictions
+        preds = df[pred_name + '_neutralized'].values  # np.array of predictions
     return preds
 
 
@@ -205,44 +205,44 @@ def plot_feature_neutralization_new(tour_df, neut_percent, full=False,
                                                         bf.feature_exposure(validation_data, pred_name)))
     plt.show()
 
-	if neutralize_total:
-		# Plot the feature exposures with neutralization
-		validation_data[pred_name+'_neutralized'] = fn.neutralize_short(validation_data,
-		                                                                   prediction_name=pred_name,
-		                                                                   proportion=neut_percent)
+    if neutralize_total:
+        # Plot the feature exposures with neutralization
+        validation_data[pred_name + '_neutralized'] = fn.neutralize_short(validation_data,
+                                                                          prediction_name=pred_name,
+                                                                          proportion=neut_percent)
 
-		feat_exps, feats = bf.feature_exposures(validation_data, pred_name+'_neutralized')
+        feat_exps, feats = bf.feature_exposures(validation_data, pred_name + '_neutralized')
 
-		plt.figure()
-		ax1 = sns.barplot(x=feats, y=feat_exps)
-		ax1.legend(title='Max_feature_exposure : {}\n'
-		                 'Mean feature exposure : {}'.format(
-		    bf.max_feature_exposure(validation_data, pred_name+'_neutralized'),
-		    bf.feature_exposure(validation_data, pred_name+'_neutralized')))
-		plt.show()
+        plt.figure()
+        ax1 = sns.barplot(x=feats, y=feat_exps)
+        ax1.legend(title='Max_feature_exposure : {}\n'
+                         'Mean feature exposure : {}'.format(
+            bf.max_feature_exposure(validation_data, pred_name + '_neutralized'),
+            bf.feature_exposure(validation_data, pred_name + '_neutralized')))
+        plt.show()
 
-		val_corrs_neut = bf.corr_score(validation_data, pred_name+'_neutralized', target_name)
-		val_sharpe_neut = bf.sharpe_score(val_corrs_neut)
-		
-	if neutralize_per_era:
-		# Plot the feature exposures with neutralization per era
-		validation_data[PRED_NAME_NEUT_PER_ERA] = fn.neutralize(
-		    df=validation_data, columns=[pred_name],
-		    extra_neutralizers=feature_names,
-		    proportion=neut_percent, normalize=True, era_col='era')
+        val_corrs_neut = bf.corr_score(validation_data, pred_name + '_neutralized', target_name)
+        val_sharpe_neut = bf.sharpe_score(val_corrs_neut)
 
-		# validation_data[PRED_NAME_NEUT_PER_ERA] = minmax_scale_values(df=validation_data,
-		#                                                               pred_name=PRED_NAME_NEUT_PER_ERA)
+    if neutralize_per_era:
+        # Plot the feature exposures with neutralization per era
+        validation_data[PRED_NAME_NEUT_PER_ERA] = fn.neutralize(
+            df=validation_data, columns=[pred_name],
+            extra_neutralizers=feature_names,
+            proportion=neut_percent, normalize=True, era_col='era')
 
-		feat_exps, feats = bf.feature_exposures(validation_data, PRED_NAME_NEUT_PER_ERA)
+        # validation_data[PRED_NAME_NEUT_PER_ERA] = minmax_scale_values(df=validation_data,
+        #                                                               pred_name=PRED_NAME_NEUT_PER_ERA)
 
-		plt.figure()
-		ax1 = sns.barplot(x=feats, y=feat_exps)
-		ax1.legend(title='Max_feature_exposure : {}\n'
-		                 'Mean feature exposure : {}'.format(
-		    bf.max_feature_exposure(validation_data, PRED_NAME_NEUT_PER_ERA),
-		    bf.feature_exposure(validation_data, PRED_NAME_NEUT_PER_ERA)))
-		plt.show()
+        feat_exps, feats = bf.feature_exposures(validation_data, PRED_NAME_NEUT_PER_ERA)
+
+        plt.figure()
+        ax1 = sns.barplot(x=feats, y=feat_exps)
+        ax1.legend(title='Max_feature_exposure : {}\n'
+                         'Mean feature exposure : {}'.format(
+            bf.max_feature_exposure(validation_data, PRED_NAME_NEUT_PER_ERA),
+            bf.feature_exposure(validation_data, PRED_NAME_NEUT_PER_ERA)))
+        plt.show()
 
     # plot and print correlations per era
     if show_metrics:
@@ -255,26 +255,24 @@ def plot_feature_neutralization_new(tour_df, neut_percent, full=False,
     else:
         plot_corrs_per_era_new(validation_data, pred_name)
 
+        if neutralize_total:
+            if show_metrics:
+                metrics = print_metrics_new(tour_df=validation_data,
+                                            pred_name=pred_name + '_neutralized',
+                                            feature_names=feature_names,
+                                            long_metrics=True)
+            if legend_title is not None:
+                plot_corrs_per_era_new(validation_data, pred_name + '_neutralized', legend_title[1])
+            else:
+                plot_corrs_per_era_new(validation_data, pred_name + '_neutralized')
 
-	if neutralize_total:
-		if show_metrics:
-		    metrics = print_metrics_new(tour_df=validation_data,
-		                                pred_name=pred_name+'_neutralized',
-		                                feature_names=feature_names,
-		                                long_metrics=True)                            
-		if legend_title is not None:
-		    plot_corrs_per_era_new(validation_data, pred_name+'_neutralized', legend_title[1])
-		else:
-		    plot_corrs_per_era_new(validation_data, pred_name + '_neutralized')
-
-	if neutralize_per_era:
-		if show_metrics:
-			metrics = print_metrics_new(tour_df=validation_data,
-					                    pred_name=PRED_NAME_NEUT_PER_ERA,
-					                    feature_names=feature_names,
-					                    long_metrics=True)
-		if legend_title is not None:
-			plot_corrs_per_era_new(validation_data, PRED_NAME_NEUT_PER_ERA, legend_title[2])
-		else:
-			plot_corrs_per_era_new(validation_data, PRED_NAME_NEUT_PER_ERA)
-
+        if neutralize_per_era:
+            if show_metrics:
+                metrics = print_metrics_new(tour_df=validation_data,
+                                            pred_name=PRED_NAME_NEUT_PER_ERA,
+                                            feature_names=feature_names,
+                                            long_metrics=True)
+            if legend_title is not None:
+                plot_corrs_per_era_new(validation_data, PRED_NAME_NEUT_PER_ERA, legend_title[2])
+            else:
+                plot_corrs_per_era_new(validation_data, PRED_NAME_NEUT_PER_ERA)
