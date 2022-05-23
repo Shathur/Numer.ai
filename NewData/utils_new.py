@@ -1,6 +1,3 @@
-from basic_functions import *
-from feature_neutralization import *
-
 import basic_functions as bf
 import feature_neutralization as fn
 
@@ -249,6 +246,10 @@ def plot_feature_neutralization_new(tour_df, neut_percent, full=False,
         metrics = print_metrics_new(tour_df=validation_data, pred_name=pred_name,
                                     feature_names=feature_names,
                                     long_metrics=True)
+
+    print(validation_data.head())
+    validation_data.reset_index(inplace=True)
+    print(validation_data.head())
 
     if legend_title is not None:
         plot_corrs_per_era_new(validation_data, pred_name, legend_title[0])
