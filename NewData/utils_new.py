@@ -255,24 +255,24 @@ def plot_feature_neutralization_new(tour_df, neut_percent, full=False,
     else:
         plot_corrs_per_era_new(validation_data, pred_name)
 
-        if neutralize_total:
-            if show_metrics:
-                metrics = print_metrics_new(tour_df=validation_data,
-                                            pred_name=pred_name + '_neutralized',
-                                            feature_names=feature_names,
-                                            long_metrics=True)
-            if legend_title is not None:
-                plot_corrs_per_era_new(validation_data, pred_name + '_neutralized', legend_title[1])
-            else:
-                plot_corrs_per_era_new(validation_data, pred_name + '_neutralized')
+    if neutralize_total:
+        if show_metrics:
+            metrics = print_metrics_new(tour_df=validation_data,
+                                        pred_name=pred_name + '_neutralized',
+                                        feature_names=feature_names,
+                                        long_metrics=True)
+        if legend_title is not None:
+            plot_corrs_per_era_new(validation_data, pred_name + '_neutralized', legend_title[1])
+        else:
+            plot_corrs_per_era_new(validation_data, pred_name + '_neutralized')
 
-        if neutralize_per_era:
-            if show_metrics:
-                metrics = print_metrics_new(tour_df=validation_data,
-                                            pred_name=PRED_NAME_NEUT_PER_ERA,
-                                            feature_names=feature_names,
-                                            long_metrics=True)
-            if legend_title is not None:
-                plot_corrs_per_era_new(validation_data, PRED_NAME_NEUT_PER_ERA, legend_title[2])
-            else:
-                plot_corrs_per_era_new(validation_data, PRED_NAME_NEUT_PER_ERA)
+    if neutralize_per_era:
+        if show_metrics:
+            metrics = print_metrics_new(tour_df=validation_data,
+                                        pred_name=PRED_NAME_NEUT_PER_ERA,
+                                        feature_names=feature_names,
+                                        long_metrics=True)
+        if legend_title is not None:
+            plot_corrs_per_era_new(validation_data, PRED_NAME_NEUT_PER_ERA, legend_title[2])
+        else:
+            plot_corrs_per_era_new(validation_data, PRED_NAME_NEUT_PER_ERA)
