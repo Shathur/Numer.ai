@@ -182,6 +182,7 @@ def plot_feature_neutralization_new(tour_df, neut_percent, full=False,
                                     feature_names=None,
                                     pred_name='prediction',
                                     target_name='target',
+                                    plot_feature_exposures=True,
                                     neutralize_total=False,
                                     neutralize_per_era=True,
                                     show_metrics=False,
@@ -194,15 +195,16 @@ def plot_feature_neutralization_new(tour_df, neut_percent, full=False,
         val2_eras = ['era' + str(x) for x in val2_eras]
         validation_data = tour_df[tour_df['era'].isin(val2_eras)]
 
-    # Plot feature exposures
-    feat_exps, feats = bf.feature_exposures(validation_data, pred_name)
+    if plot_feature_exposures:
+        # Plot feature exposures
+        feat_exps, feats = bf.feature_exposures(validation_data, pred_name)
 
-    plt.figure()
-    ax = sns.barplot(x=feats, y=feat_exps)
-    ax.legend(title='Max_feature_exposure : {}\n'
-                    'Mean feature exposure : {}'.format(bf.max_feature_exposure(validation_data, pred_name),
-                                                        bf.feature_exposure(validation_data, pred_name)))
-    plt.show()
+        plt.figure()
+        ax = sns.barplot(x=feats, y=feat_exps)
+        ax.legend(title='Max_feature_exposure : {}\n'
+                        'Mean feature exposure : {}'.format(bf.max_feature_exposure(validation_data, pred_name),
+                                                            bf.feature_exposure(validation_data, pred_name)))
+        plt.show()
 
     if neutralize_total:
         # Plot the feature exposures with neutralization
