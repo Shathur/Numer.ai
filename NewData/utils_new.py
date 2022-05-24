@@ -251,10 +251,6 @@ def plot_feature_neutralization_new(tour_df, neut_percent, full=False,
                                     feature_names=feature_names,
                                     long_metrics=True)
 
-    print(validation_data.head())
-    validation_data.reset_index(inplace=True)
-    print(validation_data.head())
-
     if legend_title is not None:
         plot_corrs_per_era_new(validation_data, pred_name, legend_title[0])
     else:
