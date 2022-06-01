@@ -1,14 +1,13 @@
 import pandas as pd
 import numpy as np
-
-import basic_functions as bf
-
 import lightgbm as lgb
 from sklearn.preprocessing import MinMaxScaler
 import pickle
 from tqdm.notebook import tqdm
 import os
 import gc
+
+from models import get_model_lst, create_model
 
 
 # predict in batches to avoid memory issues
@@ -89,7 +88,7 @@ def get_predictions_per_era(df=None, num_models=1, prefix=None, folder_name=None
     :param rank_average: True - rank the predictions per era or False -  total ranks in the whole dataframe
     :return: final predictions with proper dimensions for further use
     """
-    model_lst = bf.get_model_lst(num_models=num_models, prefix=prefix, folder_name=folder_name)
+    model_lst = get_model_lst(num_models=num_models, prefix=prefix, folder_name=folder_name)
     predictions_total = []
 
     X_test = df
@@ -98,7 +97,7 @@ def get_predictions_per_era(df=None, num_models=1, prefix=None, folder_name=None
         if model_type == 'lgb':
             model = lgb.Booster(model_file=model_lst[cv_num])
         if model_type == 'xgb':
-            model = bf.create_model(model_type='xgb')
+            model = create_model(model_type='xgb')
             model.load_model(model_lst[cv_num])
 
         predictions = predict_in_era_batch(model=model,
@@ -150,7 +149,7 @@ def get_predictions_per_era_joblib(df, preds_cache_file=None, num_models=1, pref
     else:
         cache = {-1: []}
 
-    model_lst = bf.get_model_lst(num_models=num_models, prefix=prefix, folder_name=folder_name)
+    model_lst = get_model_lst(num_models=num_models, prefix=prefix, folder_name=folder_name)
     predictions_total = []
     predictions_total_era_x = []
     for cv_num in tqdm(range(num_models)):
@@ -158,7 +157,7 @@ def get_predictions_per_era_joblib(df, preds_cache_file=None, num_models=1, pref
             if model_type == 'lgb':
                 model = lgb.Booster(model_file=model_lst[cv_num])
             if model_type == 'xgb':
-                model = bf.create_model(model_type='xgb')
+                model = create_model(model_type='xgb')
                 model.load_model(model_lst[cv_num])
 
             predictions = predict_in_era_batch(model=model,
@@ -218,7 +217,7 @@ def get_predictions_per_era_joblib(df, preds_cache_file=None, num_models=1, pref
                 if model_type == 'lgb':
                     model = lgb.Booster(model_file=model_lst[cv_num])
                 if model_type == 'xgb':
-                    model = bf.create_model(model_type='xgb')
+                    model = create_model(model_type='xgb')
                     model.load_model(model_lst[cv_num])
 
                 predictions_era_x = predict_in_era_batch(model=model,
