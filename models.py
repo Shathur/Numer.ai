@@ -59,7 +59,7 @@ def create_model(model_type='xgb', model_params=None):
         model.set_params(**model_params)
 
     if model_type == 'xgb':
-        model = XGBRegressor()
+        model = xgb.XGBRegressor()
         model.set_params(**model_params)
 
     return model
