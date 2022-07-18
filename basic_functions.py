@@ -113,9 +113,9 @@ def spearman(y_true, y_pred):
     return spearmanr(y_pred, y_true).correlation
 
 
-def corr_score(df, pred_name, target_name='target'):
+def corr_score(df, pred_name, target_name='target', group_name='era'):
     # Check the per-era correlations on the validation set (out of sample)
-    correlations = df.groupby("era").apply(lambda x: score(x, pred_name, target_name))
+    correlations = df.groupby(group_name).apply(lambda x: score(x, pred_name, target_name))
     return correlations
 
 
