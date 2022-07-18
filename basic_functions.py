@@ -454,9 +454,9 @@ def run_feature_neutralization(df=None, predictions_total=None,
         print('Validation correlations : {}\n'
               'Validation sharpe : {}'.format(val_corrs.mean(), sharpe))
         metrics = print_metrics(tour_df=df, pred_name=pred_name, target_name=target_name,
-                                long_metrics=False)
+                                group_name=group_name, long_metrics=False)
         metrics = print_metrics(tour_df=df, pred_name=pred_name, long_metrics=False,
-                                target_name=target_name, scores_on_val2=True)
+                                group_name=group_name, target_name=target_name, scores_on_val2=True)
 
         # run only for FN
 
@@ -472,7 +472,7 @@ def run_feature_neutralization(df=None, predictions_total=None,
             df[pred_name+'_neutralized'] = neutralize(df=df, columns=[pred_name],
                                                          extra_neutralizers=df.columns[
                                                              df.columns.str.startswith('feature')],
-                                                         proportion=proportion, normalize=True, era_col='era')
+                                                         proportion=proportion, normalize=True, era_col=group_name)
 
         validation_data = df[df['data_type'] == 'validation']
         val_corrs = corr_score(validation_data, pred_name+'_neutralized', target_name, group_name)
@@ -483,9 +483,9 @@ def run_feature_neutralization(df=None, predictions_total=None,
         # metrics will differ somewhat from training notebook cause here we neutralized the whole tournament_data
         # for submission purposes, while in the training notebook we neutralize only the validation_data.
         metrics = print_metrics(tour_df=df, pred_name=pred_name+'_neutralized', target_name=target_name,
-                                long_metrics=False)
+                                group_name=group_name, long_metrics=False)
         metrics = print_metrics(tour_df=df, pred_name=pred_name+'_neutralized', long_metrics=False,
-                                target_name=target_name, scores_on_val2=True)
+                                group_name=group_name, target_name=target_name, scores_on_val2=True)
 
         # Rescale into [0,1] range keeping rank
         minmaxscaler = MinMaxScaler(feature_range=(0, 0.999999))
