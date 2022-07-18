@@ -352,7 +352,7 @@ def print_metrics(train_df=None, val_df=None, tour_df=None, feature_names=None, 
         else:
             val2_eras = list(range(197, 213))
             val2_eras = ['era' + str(x) for x in val2_eras]
-            validation_data = tour_df[tour_df['era'].isin(val2_eras)]
+            validation_data = tour_df[tour_df[group_name].isin(val2_eras)]
             validation_correlations = corr_score(validation_data, pred_name, target_name, group_name)
             print(f"On validation_2 the correlation has mean {validation_correlations.mean()} and "
                   f"std {validation_correlations.std(ddof=0)}")
@@ -394,7 +394,7 @@ def print_metrics(train_df=None, val_df=None, tour_df=None, feature_names=None, 
             # Check the feature exposure of your oof predictions
             feature_exposures = val_df[feature_names].apply(lambda d: spearman(val_df[pred_name], d),
                                                             axis=0)
-            max_per_era = val_df.groupby("era").apply(
+            max_per_era = val_df.groupby(group_name).apply(
                 lambda d: d[feature_names].corrwith(d[pred_name]).abs().max())
             max_feature_exposure = max_per_era.mean()
             print(f"Max Feature Exposure for oof: {max_feature_exposure}")
@@ -403,7 +403,7 @@ def print_metrics(train_df=None, val_df=None, tour_df=None, feature_names=None, 
         feature_exposures = validation_data[feature_names].apply(
             lambda d: spearman(validation_data[pred_name], d),
             axis=0)
-        max_per_era = validation_data.groupby("era").apply(
+        max_per_era = validation_data.groupby(group_name).apply(
             lambda d: d[feature_names].corrwith(d[pred_name]).abs().max())
         max_feature_exposure = max_per_era.mean()
         print(f"Max Feature Exposure for validation: {max_feature_exposure}")
