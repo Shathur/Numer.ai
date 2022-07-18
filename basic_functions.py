@@ -200,8 +200,8 @@ def plot_feature_exposures(df, pred_name):
 
 
 # plot the correlations per era
-def plot_corrs_per_era(df, pred_name='prediction', target_name='target'):
-    val_corrs = corr_score(df, pred_name, target_name)
+def plot_corrs_per_era(df, pred_name='prediction', target_name='target', group_name='era'):
+    val_corrs = corr_score(df, pred_name, target_name, group_name)
     plt.figure()
     ax = sns.barplot(x=val_corrs.index.str.slice(3), y=val_corrs)
     plt.show()
@@ -210,7 +210,7 @@ def plot_corrs_per_era(df, pred_name='prediction', target_name='target'):
 # Feature Neutralization and plot the results
 def plot_feature_neutralization(tour_df, neut_percent,
                                 target_name='target', pred_name='prediction',
-                                full=False, show_metrics=False,
+                                group_name='era', full=False, show_metrics=False,
                                 scores_on_val2=False, legend_title=None):
     if full == False:
         validation_data = tour_df[tour_df.data_type == "validation"]
@@ -229,7 +229,7 @@ def plot_feature_neutralization(tour_df, neut_percent,
                                                         feature_exposure(validation_data, pred_name)))
     plt.show()
 
-    val_corrs = corr_score(validation_data, pred_name, target_name)
+    val_corrs = corr_score(validation_data, pred_name, target_name, group_name)
 
     val_sharpe = sharpe_score(val_corrs)
 
@@ -248,7 +248,7 @@ def plot_feature_neutralization(tour_df, neut_percent,
         feature_exposure(validation_data, pred_name+'_neutralized')))
     plt.show()
 
-    val_corrs_neut = corr_score(validation_data, pred_name+'_neutralized', target_name)
+    val_corrs_neut = corr_score(validation_data, pred_name+'_neutralized', target_name, group_name)
     val_sharpe_neut = sharpe_score(val_corrs_neut)
 
     # plot and print correlations per era
@@ -276,7 +276,7 @@ def plot_feature_neutralization(tour_df, neut_percent,
         feature_exposure(validation_data, PRED_NAME_NEUT_PER_ERA)))
     plt.show()
 
-    val_corrs_neut_per_era = corr_score(validation_data, PRED_NAME_NEUT_PER_ERA, target_name)
+    val_corrs_neut_per_era = corr_score(validation_data, PRED_NAME_NEUT_PER_ERA, target_name, group_name)
     val_sharpe_neut_per_era = sharpe_score(val_corrs_neut_per_era)
 
     # plot and print correlations per era
@@ -315,7 +315,7 @@ def plot_feature_neutralization(tour_df, neut_percent,
 
 
 def print_metrics(train_df=None, val_df=None, tour_df=None, feature_names=None, pred_name='prediction',
-                  target_name='target', long_metrics=True, scores_on_val2=False):
+                  target_name='target', long_metrics=True, scores_on_val2=False, group_name='era'):
     """
     When you print neutralized metrics train_df has to be None cause we don't
     neutralize our targets on train_df
@@ -326,7 +326,7 @@ def print_metrics(train_df=None, val_df=None, tour_df=None, feature_names=None, 
 
     if train_df is not None:
         # Check the per-era correlations on the training set (in sample)
-        train_correlations = corr_score(train_df, pred_name, target_name)
+        train_correlations = corr_score(train_df, pred_name, target_name, group_name)
         print(
             f"On training the correlation has mean {train_correlations.mean()} and std {train_correlations.std(ddof=0)}")
     else:
@@ -335,7 +335,7 @@ def print_metrics(train_df=None, val_df=None, tour_df=None, feature_names=None, 
     if val_df is not None:
         '''Out of Fold Validation'''
         # Check the per-era correlations on the oof set (out of fold)
-        oof_correlations = corr_score(val_df, pred_name, target_name)
+        oof_correlations = corr_score(val_df, pred_name, target_name, group_name)
         print(f"On oof the correlation has mean {oof_correlations.mean()} and "
               f"std {oof_correlations.std(ddof=0)}")
     else:
@@ -346,14 +346,14 @@ def print_metrics(train_df=None, val_df=None, tour_df=None, feature_names=None, 
             """Validation Metrics"""
             # Check the per-era correlations on the validation set (out of sample)
             validation_data = tour_df[tour_df.data_type == "validation"]
-            validation_correlations = corr_score(validation_data, pred_name, target_name)
+            validation_correlations = corr_score(validation_data, pred_name, target_name, group_name)
             print(f"On validation the correlation has mean {validation_correlations.mean()} and "
                   f"std {validation_correlations.std(ddof=0)}")
         else:
             val2_eras = list(range(197, 213))
             val2_eras = ['era' + str(x) for x in val2_eras]
             validation_data = tour_df[tour_df['era'].isin(val2_eras)]
-            validation_correlations = corr_score(validation_data, pred_name, target_name)
+            validation_correlations = corr_score(validation_data, pred_name, target_name, group_name)
             print(f"On validation_2 the correlation has mean {validation_correlations.mean()} and "
                   f"std {validation_correlations.std(ddof=0)}")
 
@@ -432,7 +432,7 @@ def print_metrics(train_df=None, val_df=None, tour_df=None, feature_names=None, 
 
 # FN on either tournament or validation data
 def run_feature_neutralization(df=None, predictions_total=None,
-                               target_name='target', pred_name='prediction',
+                               target_name='target', pred_name='prediction', group_name='era',
                                proportion=0.5, neut_type='short', no_fn=False):
     assert(neut_type in ['short', 'perera'],
            'Wrong keyword given for neut_type. Needed ''short'' or ''perera'' ')
@@ -449,7 +449,7 @@ def run_feature_neutralization(df=None, predictions_total=None,
         df[pred_name] = predictions_total  # predictions from model
 
         validation_data = df[df['data_type'] == 'validation']
-        val_corrs = corr_score(validation_data, pred_name, target_name)
+        val_corrs = corr_score(validation_data, pred_name, target_name, group_name)
         sharpe = sharpe_score(val_corrs)
         print('Validation correlations : {}\n'
               'Validation sharpe : {}'.format(val_corrs.mean(), sharpe))
@@ -475,7 +475,7 @@ def run_feature_neutralization(df=None, predictions_total=None,
                                                          proportion=proportion, normalize=True, era_col='era')
 
         validation_data = df[df['data_type'] == 'validation']
-        val_corrs = corr_score(validation_data, pred_name+'_neutralized', target_name)
+        val_corrs = corr_score(validation_data, pred_name+'_neutralized', target_name, group_name)
         sharpe = sharpe_score(val_corrs)
         print('Validation correlations : {}\n'
               'Validation sharpe : {}'.format(val_corrs.mean(), sharpe))
