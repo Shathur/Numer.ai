@@ -21,8 +21,8 @@ from xgboost import XGBRegressor
 
 import lightgbm as lgb
 
-from feature_neutralization import *
-from NewData.utils_new import *
+from Numerai.feature_neutralization import *
+from Numerai.NewData.utils_new import *
 
 PRED_NAME_NEUT_PER_ERA = f'prediction_neutralized_per_era'
 
