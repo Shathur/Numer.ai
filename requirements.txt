@@ -9,3 +9,4 @@ lightgbm
 tensorflow
 joblib
 tqdm
+jupyter
