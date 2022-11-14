@@ -41,7 +41,7 @@ def predict_in_era_batch(model, df, era_idx, rank_per_era):
 
 
 # predict in batches. xgb and lgb supported only atm
-def get_predictions(df=None, num_models=1, prefix=None, folder_name=None, model_type='xgb', batch_size=20000):
+def get_predictions(df=None, num_models=1, prefix=None, folder_name=None, model_type='xgb', batch_size=20000, verbose=True):
     """
 
     :param df: dataframe with the features used to train and predict
@@ -51,9 +51,10 @@ def get_predictions(df=None, num_models=1, prefix=None, folder_name=None, model_
     :param folder_name: name of the folder
     :param model_type: xgb or lgb
     :param batch_size: predict in batch_size equal to this number
+    :param verbose: print models list
     :return: np.array with predictions for the df
     """
-    model_lst = get_model_lst(num_models=num_models, prefix=prefix, folder_name=folder_name)
+    model_lst = get_model_lst(num_models=num_models, prefix=prefix, folder_name=folder_name, verbose=verbose)
     predictions_total = []
     for cv_num in range(num_models):
         if model_type == 'lgb':
@@ -75,7 +76,7 @@ def get_predictions(df=None, num_models=1, prefix=None, folder_name=None, model_
 
 # predict in batches on a per-era basis. xgb and lgb supported only atm
 def get_predictions_per_era(df=None, num_models=1, prefix=None, folder_name=None, era_idx=[],
-                            model_type='xgb', rank_average=False):
+                            model_type='xgb', rank_average=False, verbose=True):
     """
 
     :param df: dataframe with the features used to train and predict
@@ -85,10 +86,11 @@ def get_predictions_per_era(df=None, num_models=1, prefix=None, folder_name=None
     :param folder_name: name of the folder
     :param era_idx: indices of dataframe
     :param model_type: xgb or lgb
-    :param rank_average: True - rank the predictions per era or False -  total ranks in the whole dataframe
+    :param rank_average: True - rank the predictions per era or False - total ranks in the whole dataframe
+    :param verbose: True - print models list
     :return: final predictions with proper dimensions for further use
     """
-    model_lst = get_model_lst(num_models=num_models, prefix=prefix, folder_name=folder_name)
+    model_lst = get_model_lst(num_models=num_models, prefix=prefix, folder_name=folder_name, verbose=verbose)
     predictions_total = []
 
     X_test = df
@@ -118,7 +120,7 @@ def get_predictions_per_era(df=None, num_models=1, prefix=None, folder_name=None
 
 def get_predictions_per_era_joblib(df, preds_cache_file=None, num_models=1, prefix=None, len_live=None,
                                    era_idx=[], era_x_idx=[], model_type='xgb', folder_name=None,
-                                   rank_average=False, first_week=False):
+                                   rank_average=False, first_week=False, verbose=True):
     """
 
     Parameters
@@ -134,6 +136,7 @@ def get_predictions_per_era_joblib(df, preds_cache_file=None, num_models=1, pref
     folder_name: folder where models are saved
     rank_average: True - rank the predictions per era or False -  total ranks in the whole dataframe
     first_week: boolean
+    verbose: boolean
 
     Returns
     -------
@@ -149,7 +152,7 @@ def get_predictions_per_era_joblib(df, preds_cache_file=None, num_models=1, pref
     else:
         cache = {-1: []}
 
-    model_lst = get_model_lst(num_models=num_models, prefix=prefix, folder_name=folder_name)
+    model_lst = get_model_lst(num_models=num_models, prefix=prefix, folder_name=folder_name, verbose=verbose)
     predictions_total = []
     predictions_total_era_x = []
     for cv_num in tqdm(range(num_models)):
