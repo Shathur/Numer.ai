@@ -4,7 +4,7 @@ import xgboost as xgb
 
 
 # get models into a list for iteration on them
-def get_model_lst(num_models=1, prefix=None, folder_name=None):
+def get_model_lst(num_models=1, prefix=None, folder_name=None, verbose=True):
     """
 
     Parameters
@@ -12,6 +12,7 @@ def get_model_lst(num_models=1, prefix=None, folder_name=None):
     num_models: If 0 keep all the models in the folder
     prefix
     folder_name
+    verbose: boolean 0 stay silent -- 1 print(models list)
 
     Returns
     -------
@@ -26,7 +27,8 @@ def get_model_lst(num_models=1, prefix=None, folder_name=None):
         model_lst_final = model_lst[0:num_models]
     else:
         model_lst_final = model_lst
-    print(model_lst_final)
+    if verbose:
+        print(model_lst_final)
 
     return model_lst_final
 
