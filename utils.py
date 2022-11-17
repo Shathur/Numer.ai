@@ -45,11 +45,12 @@ def read_csv(file_path, rows_num=0, skip_rows_num=0, load_val=False):
 
     if load_val:
         dtypes = {x: np.float16 for x in column_names if x.startswith(('feature', 'target'))}
-        read_rows_skip = pd.read_csv('C:/Users/Ilias/Desktop/Numer.ai/numerai_datasets/validation_indexes.csv')
+        numerai_datasets_path = os.path.join(os.path.dirname(__file__), 'numerai_datasets')
+        read_rows_skip = pd.read_csv(os.path.join(numerai_datasets_path, 'validation_indexes.csv'))
         skip_rows = list(read_rows_skip['0'])
         # extend skip_rows list to include future extra eras
         skip_rows = skip_rows + list(range((skip_rows[-1] + 2), np.int(10e6)))
-        df = pd.read_csv("C:/Users/Ilias/Desktop/Numer.ai/numerai_datasets/numerai_tournament_data.csv",
+        df = pd.read_csv(os.path.join(numerai_datasets_path,"numerai_tournament_data.csv"),
                          skiprows=skip_rows, dtype=dtypes)
         # df[df['era'] == 'era852']
         # df[df['era'] == 'eraX']
