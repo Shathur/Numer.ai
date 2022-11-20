@@ -299,7 +299,7 @@ def cross_validate_train(feature_names, cv_split_data, target_name=TARGET_NAME, 
 
 
 def cv_split_creator(df, col, cv_scheme=TimeSeriesSplitGroups, n_splits=4, is_string=False,
-                     extra_constructor_params={}, extra_params={}, return_col=False):
+                     extra_constructor_params={}, extra_fit_params={}, return_col=False):
 
     # add another column with date id to feed the cv splitter
     if col+'_No' not in df.columns:
@@ -315,7 +315,8 @@ def cv_split_creator(df, col, cv_scheme=TimeSeriesSplitGroups, n_splits=4, is_st
         dateno_values = df[col+'_No']
 
     # create TimeSeriesGroupSplit object and use .split to create our folds
-    time_group_splitter = cv_scheme(n_splits=n_splits, **extra_constructor_params).split(df, groups=dateno_values, **extra_params)
+    time_group_splitter = cv_scheme(n_splits=n_splits,
+    **extra_constructor_params).split(df, groups=dateno_values, **extra_fit_params)
 
     # keep the data in list format
     cv_split_data = list(time_group_splitter)
