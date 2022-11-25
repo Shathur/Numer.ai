@@ -44,8 +44,9 @@ def run_model(train_data=None, val_data=None, model_type='xgb', model_params=Non
 
     if save_to_drive:
         model.save_model(save_folder + 'model_{}.'.format(cv_count)+model_type)
+        model.save_model(os.path.join(save_folder, f'model_{cv_count}.', model_type))
     else:
-        model.save_model('model_{}.'.format(cv_count)+model_type)
+        model.save_model(os.path.join(f'model_{cv_count}.', model_type))
 
     return model
 
