@@ -43,9 +43,9 @@ def run_model(train_data=None, val_data=None, model_type='xgb', model_params=Non
     model.fit(X_train, y_train, eval_set=[(X_val, y_val)], early_stopping_rounds=10, verbose=False)
 
     if save_to_drive:
-        model.save_model(os.path.join(save_folder, f'model_{cv_count}.', model_type))
+        model.save_model(os.path.join(save_folder, f'model_{cv_count}.{model_type}'))
     else:
-        model.save_model(os.path.join(f'model_{cv_count}.', model_type))
+        model.save_model(os.path.join(f'model_{cv_count}.{model_type}'))
 
     return model
 
