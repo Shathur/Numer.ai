@@ -17,7 +17,7 @@ class Preprocessor():
         self.test_df = pd.DataFrame()
         self.feature_cols = []
         self.target = target
-        self.n_splits = n_splits,
+        self.n_splits = n_splits
         self.cv_split_data : []
 
     def download_data(
@@ -91,4 +91,4 @@ class Preprocessor():
             save_folder=save_folder,
             calculate_metrics=True,
             plot_metrics=False
-)
+    )
