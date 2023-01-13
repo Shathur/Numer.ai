@@ -4,21 +4,20 @@ import numerapi
 import pandas as pd
 import json
 import gc
-sys.path.append(os.path.join(os.path.dirname(__file__),'Numerai'))
-from Numerai.cv_splits import cv_split_creator, cross_validate_train, TimeSeriesSplitGroupsPurged
+from cv_splits import cv_split_creator, cross_validate_train, TimeSeriesSplitGroupsPurged
 
 
 class Preprocessor():
     
-    def __init__(self,datapath):
+    def __init__(self,datapath,n_splits,target):
         self.napi = numerapi.NumerAPI()
         self.datapath = datapath
         self.train_df = pd.DataFrame()
         self.validation_df = pd.DataFrame()
         self.test_df = pd.DataFrame()
         self.feature_cols = []
-        self.target = 'target_nomi'
-        self.n_splits = 1
+        self.target = target
+        self.n_splits = n_splits,
         self.cv_split_data : []
 
     def download_data(
@@ -70,7 +69,7 @@ class Preprocessor():
             cv_scheme=TimeSeriesSplitGroupsPurged,
             n_splits=self.n_splits,
             extra_constructor_params={'embg_grp_num':12}
-    )
+        )
 
     def get_test_data(self,num_tour_eras):
         unique_train_eras = self.train_df.columns.tolist()
