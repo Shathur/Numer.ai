@@ -99,7 +99,6 @@ class TimeSeriesSplitGroupsPurged(_BaseKFold):
         else:
             yield (indices[groups.isin(group_list[:int(0.8*len(group_list))-embg_grp_num])],
                     indices[groups.isin(group_list[int(0.8*len(group_list))-embg_grp_num:])])
-)
 
 
 class PurgedKfold(_BaseKFold):
