@@ -1,6 +1,7 @@
 import os
-import lightgbm as lgb
-import xgboost as xgb
+from lightgbm import LGBMRegressor
+from xgboost import XGBRegressor, XGBClassifier
+import json
 
 
 # get models into a list for iteration on them
@@ -83,7 +84,7 @@ def create_model(model_type='xgb', task_type='regression', model_params=None):
     else:
         pass
     if model_type == 'lgb':
-        model = lgb.LGBMRegressor()
+        model = LGBMRegressor()
         model.set_params(**model_params)
 
     if model_type == 'xgb':
