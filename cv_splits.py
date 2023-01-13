@@ -182,7 +182,7 @@ def cvscore(clf, X, y, sample_weight, scoring='neg_log_loss', t1=None, cv=None, 
 
 def cross_validate_train(feature_names, cv_split_data, target_name=TARGET_NAME, train_df=None,
                          tour_df=None, type_of_model='xgb', model_params=None, fit_params=None, save_to_drive=False,
-                         save_folder=None, calculate_metrics=True, plot_metrics=False):
+                         save_folder=None, legacy_save=True, calculate_metrics=True, plot_metrics=False):
     """
 
     :param feature_names: list with feature names
@@ -253,7 +253,7 @@ def cross_validate_train(feature_names, cv_split_data, target_name=TARGET_NAME, 
         val_tuple = [X_val, y_val]
         model = models.run_model(train_data=train_tuple, val_data=val_tuple, model_type=type_of_model,
                                 model_params=model_params, fit_params=fit_params, save_to_drive=save_to_drive,
-                                save_folder=save_folder, cv_count=cv_count)
+                                save_folder=save_folder, legacy_save=legacy_save, cv_count=cv_count)
 
         if calculate_metrics:
             # predict
