@@ -79,7 +79,9 @@ class TimeSeriesSplitGroupsPurged(_BaseKFold):
     def split(self, X, y=None, groups=None):
         X, y, groups = indexable(X, y, groups)
         n_samples = _num_samples(X)
-        n_splits = self.n_splits        embg_grp_num = self.embg_grp_num        n_folds = n_splits + 1
+        n_splits = self.n_splits
+        embg_grp_num = self.embg_grp_num
+        n_folds = n_splits + 1
         group_list = np.unique(groups)
         n_groups = len(group_list)
         if n_folds > n_groups:
