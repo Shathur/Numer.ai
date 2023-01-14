@@ -239,7 +239,7 @@ def cross_validate_train(feature_names, cv_split_data, target_name=TARGET_NAME, 
         era_idx_val = [val_data[val_data['era'] == x].index for x in era_lst_validation]
         val_data.loc[:, target_name] = val_data.loc[:, target_name].fillna(2)
 
-        if tour_df is not None:
+        if ((tour_df is not None) and (not tour_df.empty)):
             era_lst_tour = tour_df['era'].unique()
             era_idx_tour = [tour_df[tour_df['era'] == x].index for x in era_lst_tour]
             # here is also the spot to check the target for Nan and fill them with 0.5
@@ -271,7 +271,7 @@ def cross_validate_train(feature_names, cv_split_data, target_name=TARGET_NAME, 
             predictions_val_total.append(predictions_val)
 
             # do the same for the whole tournament data
-            if tour_df is not None:
+            if ((tour_df is not None) and (not tour_df.empty)):
                 predictions_tour = predict_in_era_batch(model, tour_df[feature_names], era_idx=era_idx_tour,
                                                         rank_per_era=True)
                 tour_df[PREDICTION_NAME] = predictions_tour
@@ -286,7 +286,7 @@ def cross_validate_train(feature_names, cv_split_data, target_name=TARGET_NAME, 
             if plot_metrics:
                 plot_corrs_per_era_new(df=val_data, pred_name=PREDICTION_NAME, target_name=target_name)
                 print(120 * '*')
-                if tour_df is not None:
+                if ((tour_df is not None) and (not tour_df.empty)):
                     plot_corrs_per_era_new(df=tour_df, pred_name=PREDICTION_NAME, target_name=target_name)
 
             # average performance of each fold
@@ -294,7 +294,7 @@ def cross_validate_train(feature_names, cv_split_data, target_name=TARGET_NAME, 
             val_corrs_std_cv.append(val_correlations.std(ddof=0))
             val_sharpe_cv.append(val_sharpe)
 
-            if tour_df is not None:
+            if ((tour_df is not None) and (not tour_df.empty)):
                 tour_corrs_mean_cv.append(tour_correlations.mean())
                 tour_corrs_std_cv.append(tour_correlations.std(ddof=0))
                 tour_sharpe_cv.append(tour_sharpe)
