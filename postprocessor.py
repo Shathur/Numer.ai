@@ -33,7 +33,7 @@ class PostProcessor():
     def get_predictions_per_era(self,df,model_path,model_type):
         """Return predictions per era for our df"""
         return get_predictions_per_era(
-            df=df,
+            df=df[self.preprocessor.feature_cols],
             num_models=len(os.listdir(model_path)),
             prefix=self.prefix,
             folder_name=model_path,
