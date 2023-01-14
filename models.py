@@ -19,7 +19,8 @@ def get_model_lst(num_models=1, prefix=None, folder_name=None, verbose=True):
     -------
 
     """
-    model_lst = [folder_name + x for x in os.listdir(folder_name)]
+    # model_lst = [folder_name + x for x in os.listdir(folder_name)]
+    model_lst = [os.path.join(folder_name, x) for x in os.listdir(os.path.join(folder_name))]
     if prefix is not None:
         model_lst = [x for x in model_lst if x.startswith(folder_name+prefix)]
     else:
