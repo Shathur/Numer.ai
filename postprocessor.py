@@ -53,6 +53,9 @@ class PostProcessor():
         public_key,secret_key = self.get_keys()
         # keep our model names as list to iterate on
         model_names = self.predictions_gathered_df.columns.tolist()
+        # keep id as a column
+        if 'id' not in self.predictions_gathered_df.columns.tolist():
+            self.predictions_gathered_df.reset_index(inplace=True)
         predictions_df = self.predictions_gathered_df['id'].copy().to_frame()
         for name in tqdm(model_names):
             predictions_df['prediction'] = self.predictions_gathered_df[name]
