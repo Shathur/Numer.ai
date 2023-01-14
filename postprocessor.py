@@ -46,17 +46,22 @@ class PostProcessor():
     def add_predictions_per_era(self,df:pd.DataFrame(),model_name:str,model_type:str):
         """predict and add prediction to dataframe"""
         predictions = self.get_predictions_per_era(df,os.path.join(self.models_path,model_name),model_type)
-        self.predictions_gathered_df[model_name] = predictions
 
-    def submit_diagnostics(self):
+    def get_id_column(self, df):
+        """return index id as a column"""
+        if df.index.name == 'id':
+            id_series = df.reset_index()['id']
+        else:
+            raise ValueError("df should be a DataFrame with an index named 'id'")
+        return id_series
+
+    def submit_diagnostics(self, df):
         # get_keys
         public_key,secret_key = self.get_keys()
         # keep our model names as list to iterate on
         model_names = self.predictions_gathered_df.columns.tolist()
         # keep id as a column
-        if 'id' not in self.predictions_gathered_df.columns.tolist():
-            self.predictions_gathered_df.reset_index(inplace=True)
-        predictions_df = self.predictions_gathered_df['id'].copy().to_frame()
+        predictions_df = self.get_id_column(df).to_frame()
         for name in tqdm(model_names):
             predictions_df['prediction'] = self.predictions_gathered_df[name]
             model_id = self.napi.get_models()[name]
