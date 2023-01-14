@@ -89,6 +89,6 @@ class Preprocessor():
             fit_params=fit_params,
             save_to_drive=save_to_drive,
             save_folder=save_folder,
-            calculate_metrics=True,
-            plot_metrics=False
+            calculate_metrics=calculate_metrics,
+            plot_metrics=plot_metrics
     )
