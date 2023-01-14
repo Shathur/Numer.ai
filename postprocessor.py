@@ -30,7 +30,7 @@ class PostProcessor():
         public_id, secret_key = self.get_keys()
         return numerapi.NumerAPI(public_id=public_id, secret_key=secret_key)
     
-    def get_predictions_per_era(self,df,model_path):
+    def get_predictions_per_era(self,df,model_path,model_type):
         """Return predictions per era for our df"""
         return get_predictions_per_era(
             df=df,
@@ -38,13 +38,14 @@ class PostProcessor():
             prefix=self.prefix,
             folder_name=model_path,
             era_idx=get_era_idx(df),
-            model_type=self.preprocessor.model_type,
+            model_type=model_type,
             rank_average=False,
             verbose=False
         ) 
 
-    def add_predictions_per_era(self,df:pd.DataFrame(),model_name:str):
-        predictions = self.get_predictions_per_era(df,os.path.join(self.models_path,model_name))
+    def add_predictions_per_era(self,df:pd.DataFrame(),model_name:str,model_type:str):
+        """predict and add prediction to dataframe"""
+        predictions = self.get_predictions_per_era(df,os.path.join(self.models_path,model_name),model_type)
         self.predictions_gathered_df[model_name] = predictions
 
     def submit_diagnostics(self):
