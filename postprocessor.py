@@ -46,6 +46,7 @@ class PostProcessor():
     def add_predictions_per_era(self,df:pd.DataFrame(),model_name:str,model_type:str):
         """predict and add prediction to dataframe"""
         predictions = self.get_predictions_per_era(df,os.path.join(self.models_path,model_name),model_type)
+        self.predictions_gathered_df[model_name] = predictions
 
     def get_id_column(self, df):
         """return index id as a column"""
