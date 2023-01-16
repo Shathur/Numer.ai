@@ -56,7 +56,12 @@ class PostProcessor():
             raise ValueError("df should be a DataFrame with an index named 'id'")
         return id_series
 
-    def submit_diagnostics(self, df):
+    def submit_diagnostics(self, df, filename):
+        """
+        Submits diagnostics. This function assumes that we have trained
+        on eras before the tournament provided validation_df, and the df
+        passed is the validation_df
+        """
         # get_keys
         public_key,secret_key = self.get_keys()
         # keep our model names as list to iterate on
@@ -67,5 +72,5 @@ class PostProcessor():
             predictions_df['prediction'] = self.predictions_gathered_df[name]
             model_id = self.napi.get_models()[name]
             # Upload predictions
-            predictions_df.to_csv('diagnostics.csv', index=False)
-            submission_id = self.napi.upload_diagnostics('diagnostics.csv', model_id=model_id)
+            predictions_df.to_csv(filename, index=False)
+            submission_id = self.napi.upload_diagnostics(file_path=filename, model_id=model_id)
