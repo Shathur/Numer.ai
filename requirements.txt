@@ -8,6 +8,7 @@ scipy
 xgboost
 lightgbm
 tensorflow
+torch
 joblib
 tqdm
 jupyter
