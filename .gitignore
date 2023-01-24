@@ -1,4 +1,7 @@
 venv0/
 data/
 test41.py
+testcustom.py
 setup_env_variables.py
+customloss.py
+trainer.py
