@@ -13,8 +13,7 @@ class Preprocessor():
         self.napi = numerapi.NumerAPI()
         self.datapath = datapath
         self.train_df = pd.DataFrame()
-        self.validation_df = pd.DataFrame()
-        self.test_df = pd.DataFrame()
+        self.validation_df = pd.DataFrame() self.test_df = pd.DataFrame()
         self.feature_cols = []
         self.target = target
         self.n_splits = n_splits
@@ -62,6 +61,25 @@ class Preprocessor():
         features_json = json.load(f)
         self.feature_cols = features_json['feature_sets'][feature_group]
 
+    def per_era_correlations(self,target):
+        """Get the correlation of each era with the designated target"""
+        all_feature_corrs = training_data.groupby(ERA_COL).apply(
+            lambda era: era[features].corrwith(era[TARGET_COL])
+        )
+        return all_feature_corrs
+
+    def get_riskiest_features(self, per_era_corrs, num_of_features):
+        """per_era_correlations function is designed to return the input for here"""
+        sorted_eras = per_era_corrs.index.sort_values()
+        first_half = per_era_corrs[:len(per_era_corrs)//2] 
+        second_half = per_era_corrs[len(per_era_corrs)//2:]
+        first_half_means = per_era_corrs.loc[first_half, :].mean()
+        second_half_means = per_era_corrs.loc[second_half, :].mean()
+        per_era_corrs_diff = first_half_means - second_half_means
+        sorted_diffs = corr_diffs.abs().sort_values(ascending=False)
+        worst_n = sorted_diffs.head(num_of_features).index.tolist()
+        return sorted_diffs, worst_n
+        
     def get_cv(self):
         self.cv_split_data = cv_split_creator(
             df=self.train_df,
