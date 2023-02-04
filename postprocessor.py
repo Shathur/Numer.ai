@@ -5,6 +5,7 @@ from tqdm import tqdm
 from preprocessor import Preprocessor
 from predictions import get_predictions_per_era
 from utils import get_era_idx
+from neutralization import neutralize, neutralize_short
 from setup_env_variables import setup
 
 class PostProcessor():
@@ -14,7 +15,33 @@ class PostProcessor():
         self.prefix = prefix
         self.predictions_gathered_df = pd.DataFrame()
         self.napi = self.get_napi()
-        
+
+    def neutralize(
+        self,
+        df=self.pr.df,
+        columns=self.pr.features,
+        proportion=1,
+        era_col='era',
+        extra_neutralizers=[]
+    )
+        """
+        Calls either the neutralize or the neutralize_short from utils
+        :param df: pd.DataFrame
+        :param columns: list of features
+        :param proportion: strength of neutralization
+        :param normalize: this is needed if we have values in our columns that are negative
+            the SVD will not converge in this situation
+        :param era_col: name of each time period to group on when 'per_era' is used
+        :param extra_neutralizers: a list of other vectors to neutralize against
+        """
+        return neutralize(
+            df=df,
+            columns=columns,
+            proportion=proportion,
+            normalize=normalize,
+            era_col=era_col,
+            extra_neutralizers=extra_neutralizers
+        ) 
 
     def get_keys(self):
         """get keys from global variables"""
@@ -55,6 +82,13 @@ class PostProcessor():
         else:
             raise ValueError("df should be a DataFrame with an index named 'id'")
         return id_series
+
+    def save_predictions(self, path):
+        """save predictions df"""
+        if os.path.exists(path):
+            self.predictions_gathered_df.to_csv(os.path.join(path,'predictions_gathered_df.csv'))
+        else:
+            raise FileNotFoundError(f"{path} is not a valid path")
 
     def submit_diagnostics(self, df, filename):
         """
