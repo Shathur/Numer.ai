@@ -62,10 +62,10 @@ class Preprocessor():
         features_json = json.load(f)
         self.feature_cols = features_json['feature_sets'][feature_group]
 
-    def per_era_correlations(self,target):
+    def per_era_correlations(self,df,features,era_col,target_col):
         """Get the correlation of each era with the designated target"""
-        all_feature_corrs = training_data.groupby(ERA_COL).apply(
-            lambda era: era[features].corrwith(era[TARGET_COL])
+        all_feature_corrs = df.groupby(era_col).apply(
+            lambda era: era[features].corrwith(era[target_col])
         )
         return all_feature_corrs
 
