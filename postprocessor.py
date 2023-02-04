@@ -23,7 +23,7 @@ class PostProcessor():
         proportion=1,
         era_col='era',
         extra_neutralizers=[]
-    )
+    ):
         """
         Calls either the neutralize or the neutralize_short from utils
         :param df: pd.DataFrame
