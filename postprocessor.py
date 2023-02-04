@@ -18,8 +18,8 @@ class PostProcessor():
 
     def neutralize(
         self,
-        df=self.pr.df,
-        columns=self.pr.features,
+        df,
+        columns,
         proportion=1,
         era_col='era',
         extra_neutralizers=[]
