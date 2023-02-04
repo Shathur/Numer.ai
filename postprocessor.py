@@ -5,7 +5,7 @@ from tqdm import tqdm
 from preprocessor import Preprocessor
 from predictions import get_predictions_per_era
 from utils import get_era_idx
-from neutralization import neutralize, neutralize_short
+from feature_neutralization import neutralize, neutralize_short
 from setup_env_variables import setup
 
 class PostProcessor():
