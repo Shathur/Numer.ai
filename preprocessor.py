@@ -74,8 +74,8 @@ class Preprocessor():
         sorted_eras = per_era_corrs.index.sort_values()
         first_half = per_era_corrs[:len(per_era_corrs)//2] 
         second_half = per_era_corrs[len(per_era_corrs)//2:]
-        first_half_means = per_era_corrs.loc[first_half, :].mean()
-        second_half_means = per_era_corrs.loc[second_half, :].mean()
+        first_half_means = per_era_corrs.loc[first_half.index, :].mean()
+        second_half_means = per_era_corrs.loc[second_half.index, :].mean()
         per_era_corrs_diff = first_half_means - second_half_means
         sorted_diffs = corr_diffs.abs().sort_values(ascending=False)
         worst_n = sorted_diffs.head(num_of_features).index.tolist()
