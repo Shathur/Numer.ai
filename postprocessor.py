@@ -21,6 +21,7 @@ class PostProcessor():
         df,
         columns,
         proportion=1,
+        normalize=True,
         era_col='era',
         extra_neutralizers=[]
     ):
