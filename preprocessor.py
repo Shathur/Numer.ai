@@ -13,7 +13,8 @@ class Preprocessor():
         self.napi = numerapi.NumerAPI()
         self.datapath = datapath
         self.train_df = pd.DataFrame()
-        self.validation_df = pd.DataFrame() self.test_df = pd.DataFrame()
+        self.validation_df = pd.DataFrame(),
+        self.test_df = pd.DataFrame()
         self.feature_cols = []
         self.target = target
         self.n_splits = n_splits
