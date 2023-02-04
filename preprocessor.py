@@ -57,8 +57,8 @@ class Preprocessor():
             gc.collect()
 
     def get_features(self,feature_group):
-        assert os.path.exists('./data/features.json'), 'features_json does not exist, need to download it first'
-        f = open('./data/features.json')
+        assert os.path.exists(f'{self.data_path}/features.json'), 'features_json does not exist, need to download it first'
+        f = open(f'{self.datapath}/features.json')
         features_json = json.load(f)
         self.feature_cols = features_json['feature_sets'][feature_group]
 
