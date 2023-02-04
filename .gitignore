@@ -1,5 +1,6 @@
 venv0/
 data/
+models_code/
 test41.py
 testcustom.py
 setup_env_variables.py
