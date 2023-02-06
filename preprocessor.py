@@ -45,11 +45,13 @@ class Preprocessor():
         if meta_model:
             self.napi.download_dataset('v4.1/meta_model.parquet',os.path.join(self.datapath,'meta_model.parquet')) 
 
-    def get_data(self,train=False,validation=False,merge=False,clear_memory=False):
+    def get_data(self,train=False,validation=False,live=False,merge=False,clear_memory=False):
         if ((os.path.exists(os.path.join(self.datapath,'train.parquet'))) and train):
             self.train_df = pd.read_parquet(os.path.join(self.datapath,'train.parquet'))
         if ((os.path.exists(os.path.join(self.datapath,'validation.parquet'))) and validation):
             self.validation_df = pd.read_parquet(os.path.join(self.datapath,'validation.parquet'))
+        if ((os.path.exists(os.path.join(self.datapath,'live.parquet'))) and live):
+            self.live_df = pd.read_parquet(os.path.join(self.datapath,'live.parquet'))
         if merge:
             self.train_df = pd.concat([self.train_df,self.validation_df])
         if clear_memory:
