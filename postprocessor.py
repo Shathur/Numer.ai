@@ -91,9 +91,10 @@ class PostProcessor():
         else:
             raise FileNotFoundError(f"{path} is not a valid path")
 
-    def submit_diagnostics(self, df, filename):
+    def submit(self, df, filename, submit_type):
         """
-        Submits diagnostics. This function assumes that we have trained
+        Submits either live either diagnostics
+        If diagnostics are submitted we assume that we have trained
         on eras before the tournament provided validation_df, and the df
         passed is the validation_df
         """
@@ -103,9 +104,19 @@ class PostProcessor():
         model_names = self.predictions_gathered_df.columns.tolist()
         # keep id as a column
         predictions_df = self.get_id_column(df).to_frame()
-        for name in tqdm(model_names):
-            predictions_df['prediction'] = self.predictions_gathered_df[name]
-            model_id = self.napi.get_models()[name]
-            # Upload predictions
-            predictions_df.to_csv(filename, index=False)
-            submission_id = self.napi.upload_diagnostics(file_path=filename, model_id=model_id)
+        if submit_type == 'prediction':
+            for name in tqdm(model_names):
+                predictions_df['prediction'] = self.predictions_gathered_df[name]
+                model_id = self.napi.get_models()[name]
+                # Upload predictions
+                predictions_df.to_csv(filename, index=False)
+                submission_id = self.napi.upload_predictions(file_path=filename, model_id=model_id)
+        elif submit_type == 'diagnostics':
+            for name in tqdm(model_names):
+                predictions_df['prediction'] = self.predictions_gathered_df[name]
+                model_id = self.napi.get_models()[name]
+                # Upload predictions
+                predictions_df.to_csv(filename, index=False)
+                submission_id = self.napi.upload_diagnostics(file_path=filename, model_id=model_id)
+        else:
+            raise ValueError("submit_type needs to be either 'prediction' or 'diagnostics'")
