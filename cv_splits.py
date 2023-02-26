@@ -69,11 +69,12 @@ class TimeSeriesSplitGroupsPurged(_BaseKFold):
     https://forum.numer.ai/t/era-wise-time-series-cross-validation/791
     """
 
-    def __init__(self, n_splits=None, embg_grp_num=None):
+    def __init__(self, n_splits=None, embg_grp_num=None, single_split_ratio=0.8):
         if n_splits>1:
             super().__init__(n_splits,shuffle=False, random_state=None)
         else:
             self.n_splits = n_splits
+            self.single_split_ratio = single_split_ratio
         self.embg_grp_num = embg_grp_num
 
     def split(self, X, y=None, groups=None):
@@ -99,8 +100,8 @@ class TimeSeriesSplitGroupsPurged(_BaseKFold):
                 yield (indices[groups.isin(group_list[:test_start-embg_grp_num])],
                        indices[groups.isin(group_list[test_start+embg_grp_num : test_start+embg_grp_num + test_size])])
         else:
-            yield (indices[groups.isin(group_list[:int(0.8*len(group_list))-embg_grp_num])],
-                    indices[groups.isin(group_list[int(0.8*len(group_list))+embg_grp_num:])])
+            yield (indices[groups.isin(group_list[:int(self.single_split_ratio*len(group_list))-embg_grp_num])],
+                    indices[groups.isin(group_list[int(self.single_split_ratio*len(group_list))+embg_grp_num:])])
 
 
 class PurgedKfold(_BaseKFold):
