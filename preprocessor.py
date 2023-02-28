@@ -28,14 +28,19 @@ class Preprocessor():
         live_example_preds=False,
         validation_example_preds=False,
         features=False,
-        meta_model=False
+        meta_model=False,
+        integers=False,
     ):
+        if integers:
+            int_suffix='_int8'
+        else:
+            int_suffix=''
         if train:
-            self.napi.download_dataset('v4.1/train.parquet',os.path.join(self.datapath,'train.parquet')) 
+            self.napi.download_dataset(f'v4.1/train{int_suffix}.parquet',os.path.join(self.datapath,'train{int_suffix}.parquet')) 
         if validation:
-            self.napi.download_dataset('v4.1/validation.parquet',os.path.join(self.datapath,'validation.parquet')) 
+            self.napi.download_dataset(f'v4.1/validation{int_suffix}.parquet',os.path.join(self.datapath,'validation{int_suffix}.parquet')) 
         if live:
-            self.napi.download_dataset('v4.1/live.parquet',os.path.join(self.datapath,'live.parquet')) 
+            self.napi.download_dataset(f'v4.1/live{int_suffix}.parquet',os.path.join(self.datapath,'live{int_suffix}.parquet')) 
         if live_example_preds:
             self.napi.download_dataset('v4.1/live_example_preds.parquet',os.path.join(self.datapath,'live_example_preds.parquet')) 
         if validation_example_preds:
