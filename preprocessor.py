@@ -36,7 +36,7 @@ class Preprocessor():
         else:
             int_suffix=''
         if train:
-            self.napi.download_dataset(f'v4.1/train{int_suffix}.parquet',os.path.join(self.datapath,f 'train{int_suffix}.parquet')) 
+            self.napi.download_dataset(f'v4.1/train{int_suffix}.parquet',os.path.join(self.datapath,f'train{int_suffix}.parquet')) 
         if validation:
             self.napi.download_dataset(f'v4.1/validation{int_suffix}.parquet',os.path.join(self.datapath,f'validation{int_suffix}.parquet')) 
         if live:
