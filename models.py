@@ -35,8 +35,18 @@ def get_model_lst(num_models=1, prefix=None, folder_name=None, verbose=True):
     return model_lst_final
 
 
-def run_model(train_data=None, val_data=None, model_type='xgb', task_type='regression', model_params=None,
-              fit_params=None, save_to_drive=False, save_folder=None, legacy_save=True, cv_count=None):
+def run_model(
+    train_data=None,
+    val_data=None,
+    model_type='xgb',
+    task_type='regression',
+    model_params=None,
+    fit_params=None,
+    save_to_drive=False, 
+    save_folder=None,
+    legacy_save=True,
+    cv_count=None
+    ):
     X_train, y_train = train_data
     X_val, y_val = val_data
 
