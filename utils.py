@@ -474,7 +474,7 @@ def print_metrics(train_df=None, val_df=None, tour_df=None, feature_names=None, 
 def run_feature_neutralization(
     df=None,
     predictions_total=None,
-    neutralizers=[f for f in df.columns.tolist() if 'feature' in f],
+    neutralizers=[],
     target_name='target',
     pred_name='prediction',
     group_name='era',
@@ -505,6 +505,10 @@ def run_feature_neutralization(
         # run only for FN
         # choose loading from predictions_csv or from models predictions
         # tournament_data_low_mem[pred_name] = predictions_saved_df['prediction_kazutsugi'] # predictions from csv
+    
+        # get the neutralizers if there are none passed 
+        if neutralizers == []:
+            neutralizers = [f for f in df.columns.tolist() if 'feature' in f]
 
         # fill Nans
         df.loc[:, target_name] = df.loc[:, target_name].fillna(0.5)
