@@ -471,11 +471,34 @@ def print_metrics(train_df=None, val_df=None, tour_df=None, feature_names=None, 
 
 
 # FN on either tournament or validation data
-def run_feature_neutralization(df=None, predictions_total=None,
-                               target_name='target', pred_name='prediction', group_name='era',
-                               proportion=0.5, neut_type='short', no_fn=False):
-    assert (neut_type in ['short', 'perera'],
-            'Wrong keyword given for neut_type. Needed ''short'' or ''perera'' ')
+def run_feature_neutralization(
+    df=None,
+    predictions_total=None,
+    neutralizers=[f for f in df.columns.tolist() if 'feature' in f],
+    target_name='target',
+    pred_name='prediction',
+    group_name='era',
+    proportion=0.5,
+    neut_type='short',
+    no_fn=False,
+):
+    """
+    Function that runs feature neutralization on a dataframe
+
+    ::param: df: pd.DataFrame(): the dataframe we want to operate on
+    ::param: neutralizers: list: a list with the features that we want to neutralize
+    ::param: predictions_total: np.array(): our non neutralized preditions
+    ::param: target_name: str: the name of our target column
+    ::param: pred_name: str: the name of our prediction column
+    ::param: era: str: the name of our time column
+    ::param: proportion: float: value between 0 and 1 that shows the strength of the neutralization
+    ::param: neut_type: str: perform either:
+                                --neutralization on the whole dataframe at once: 'short'
+                                --neutralization on every single time horizon and then ensemble: 'perera'
+    ::param: no_fn: bool: For True the function returns the predictions_total
+    """
+    assert(neut_type in ['short', 'perera'],
+           'Wrong keyword given for neut_type. Needed ''short'' or ''perera'' ')
     if no_fn:
         preds = predictions_total
     else:
@@ -505,34 +528,42 @@ def run_feature_neutralization(df=None, predictions_total=None,
         # neut_type has to be either 'short' for neutralize_short()
         #                     either 'perera' for neutralize()
         if neut_type == 'short':
-            df[pred_name + '_neutralized'] = neutralize_short(df,
-                                                              prediction_name=pred_name,
-                                                              proportion=proportion)
+            df[pred_name+'_neutralized'] = neutralize_short(
+                df,
+                prediction_name=pred_name,
+                proportion=proportion
+            )
         elif neut_type == 'perera':
-            df[pred_name + '_neutralized'] = neutralize(df=df, columns=[pred_name],
-                                                        extra_neutralizers=df.columns[
-                                                            df.columns.str.startswith('feature')],
-                                                        proportion=proportion, normalize=True, era_col=group_name)
+            df[pred_name+'_neutralized'] = neutralize(
+                df=df,
+                columns=[pred_name],
+                extra_neutralizers=df.columns[neutralizers],
+                proportion=proportion,
+                normalize=True,
+                era_col=group_name
+            )
 
         validation_data = df[df['data_type'] == 'validation']
-        val_corrs = corr_score(validation_data, pred_name + '_neutralized', target_name, group_name)
+        val_corrs = corr_score(validation_data, pred_name+'_neutralized', target_name, group_name)
         sharpe = sharpe_score(val_corrs)
-        print('Validation correlations : {}\n'
-              'Validation sharpe : {}'.format(val_corrs.mean(), sharpe))
+        print(
+            'Validation correlations : {}\n'
+            'Validation sharpe : {}'.format(val_corrs.mean(), sharpe)
+        )
 
         # metrics will differ somewhat from training notebook cause here we neutralized the whole tournament_data
         # for submission purposes, while in the training notebook we neutralize only the validation_data.
-        metrics = print_metrics(tour_df=df, pred_name=pred_name + '_neutralized', target_name=target_name,
+        metrics = print_metrics(tour_df=df, pred_name=pred_name+'_neutralized', target_name=target_name,
                                 group_name=group_name, long_metrics=False)
-        metrics = print_metrics(tour_df=df, pred_name=pred_name + '_neutralized', long_metrics=False,
+        metrics = print_metrics(tour_df=df, pred_name=pred_name+'_neutralized', long_metrics=False,
                                 group_name=group_name, target_name=target_name, scores_on_val2=True)
 
         # Rescale into [0,1] range keeping rank
         minmaxscaler = MinMaxScaler(feature_range=(0, 0.999999))
-        minmaxscaler.fit(np.array(df[pred_name + '_neutralized']).reshape(-1, 1))
-        df[pred_name + '_neutralized'] = minmaxscaler.transform(
-            np.array(df[pred_name + '_neutralized']).reshape(-1, 1))
+        minmaxscaler.fit(np.array(df[pred_name+'_neutralized']).reshape(-1, 1))
+        df[pred_name+'_neutralized'] = minmaxscaler.transform(
+            np.array(df[pred_name+'_neutralized']).reshape(-1, 1))
 
         # preds = df[pred_name+'_neutralized'].copy()
-        preds = df[pred_name + '_neutralized'].values  # np.array of predictions
+        preds = df[pred_name+'_neutralized'].values  # np.array of predictions
     return preds
