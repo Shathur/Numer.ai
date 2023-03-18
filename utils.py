@@ -541,7 +541,7 @@ def run_feature_neutralization(
             df[pred_name+'_neutralized'] = neutralize(
                 df=df,
                 columns=[pred_name],
-                extra_neutralizers=df.columns[neutralizers],
+                extra_neutralizers=[f for f in df.columns if f in neutralizers],
                 proportion=proportion,
                 normalize=True,
                 era_col=group_name
