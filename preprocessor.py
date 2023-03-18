@@ -107,11 +107,20 @@ class Preprocessor():
         self.test_df = self.train_df[self.train_df.isin(unique_test_eras)]
         self.train_df = self.train_df[~self.train_df.isin(unique_test_eras)]
 
-    def train(self,type_of_model,model_params,fit_params,save_to_drive,save_folder,calculate_metrics,plot_metrics):
+    def train(self,type_of_model,model_params,fit_params,save_to_drive,save_folder,calculate_metrics,plot_metrics,iteration=0):
+        """
+        wrapper around cross_validate_train
+        iteration is here to choose a target in case we have a list of targets
+        """
+        if type(self.target) != list:
+            target = self.target 
+        else:
+            target = self.target[iteration]
+
         cross_validate_train(
             feature_names=self.feature_cols,
             cv_split_data=self.cv_split_data,
-            target_name=self.target,
+            target_name=target,
             train_df=self.train_df,
             tour_df=self.test_df,
             type_of_model=type_of_model,
