@@ -45,12 +45,16 @@ def run_model(
     save_to_drive=False, 
     save_folder=None,
     legacy_save=True,
-    cv_count=None
-    ):
+    cv_count=None,
+):
     X_train, y_train = train_data
     X_val, y_val = val_data
 
-    model = create_model(model_type=model_type, task_type=task_type, model_params=model_params)
+    model = create_model(
+        model_type=model_type,
+        task_type=task_type,
+        model_params=model_params,
+    )
 
     if fit_params is None:
         fit_params = {
@@ -60,7 +64,11 @@ def run_model(
     else:
         pass
 
-    model.fit(X_train, y_train, eval_set=[(X_val, y_val)], **fit_params)
+    model.fit(
+        X_train, y_train,
+        eval_set=[(X_val, y_val)],
+        **fit_params,
+    )
 
     # if we are using lgb we first need to keep the booster of our model
     if model_type == 'lgb':
