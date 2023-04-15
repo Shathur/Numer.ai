@@ -50,7 +50,7 @@ class Preprocessor():
         if meta_model:
             self.napi.download_dataset('v4.1/meta_model.parquet',os.path.join(self.datapath,'meta_model.parquet')) 
 
-    def get_data(self,train=False,validation=False,live=False,merge=False,clear_memory=False,integers=False):
+    def get_data(self,train=False,validation=False,live=False,merge=False,integers=False):
         if integers:
             int_suffix='_int8'
         else:
@@ -63,9 +63,6 @@ class Preprocessor():
             self.live_df = pd.read_parquet(os.path.join(self.datapath,f'live{int_suffix}.parquet'))
         if merge:
             self.train_df = pd.concat([self.train_df,self.validation_df])
-        if clear_memory:
-            del self.train_df,self.validation_df
-            gc.collect()
 
     def get_features(self,feature_group):
         assert os.path.exists(f'{self.datapath}/features.json'), 'features_json does not exist, need to download it first'
