@@ -89,11 +89,13 @@ class Preprocessor():
         worst_n = sorted_diffs.head(num_of_features).index.tolist()
         return sorted_diffs, worst_n
         
-    def get_cv(self, n_splits=self.n_splits):
+    def get_cv(self, n_splits=None):
         """
         gets cv_split_data object. Defaut behaviour is passing the n_splits
         in the class Constructor. We may override it here if we want
         """
+        if n_splits==None:
+            n_splits = self.n_splits
         self.cv_split_data = cv_split_creator(
             df=self.train_df,
             col='era',
