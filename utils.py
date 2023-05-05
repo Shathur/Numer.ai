@@ -7,6 +7,9 @@ import csv
 import time
 import pickle
 import os
+from tqdm import tqdm
+
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -140,6 +143,25 @@ def feature_exposures(df, pred_name):
     for f in feature_names:
         fe = spearmanr(df[pred_name], df[f])[0]
         exposures.append(fe)
+    return [np.array(exposures), feature_names]
+
+def feature_exposures_parallel(df, pred_name):
+    with ThreadPoolExecutor() as executor:
+        feature_names = [f for f in df.columns
+                         if f.startswith("feature")]
+        exposures = []
+        _futures = []
+        for feat in feature_names:
+            _futures.append(
+                executor.submit(
+                    spearmanr,
+                    a=df[pred_name],
+                    b=df[feat]
+                )
+            )
+            for future in tqdm(as_completed(_futures), total=len(_futures)):
+                single_exposure = future.result()
+                exposures.append(single_exposure[0])
     return [np.array(exposures), feature_names]
 
 
