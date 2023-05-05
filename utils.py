@@ -159,9 +159,9 @@ def feature_exposures_parallel(df, pred_name):
                     b=df[feat]
                 )
             )
-            for future in tqdm(as_completed(_futures), total=len(_futures)):
-                single_exposure = future.result()
-                exposures.append(single_exposure[0])
+        for future in tqdm(as_completed(_futures), total=len(_futures)):
+            single_exposure = future.result()
+            exposures.append(single_exposure[0])
     return [np.array(exposures), feature_names]
 
 
