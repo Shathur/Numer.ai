@@ -114,7 +114,7 @@ def train_loop(model, optimizer, feats, pred, target_exps, era):
 
 def reduce_exposure(prediction, features, max_exp, era, weights=None):
     model = tf.keras.models.Sequential([
-        tf.keras.layers.Input(310),
+        tf.keras.layers.Input(features.shape[1]), # 310
         tf.keras.experimental.LinearModel(use_bias=False),
     ])
     feats = tf.convert_to_tensor(features - 0.5, dtype=tf.float32)
