@@ -593,3 +593,23 @@ def run_feature_neutralization(
         # preds = df[pred_name+'_neutralized'].copy()
         preds = df[pred_name+'_neutralized'].values  # np.array of predictions
     return preds
+
+def rescale(prediction, targets_lst, feature_range=(0.000001, 0.999999), plot=True):
+    for t in targets_lst:
+        print(np.max(prediction[t]))
+        print(np.min(prediction[t]))
+        scaler = MinMaxScaler(feature_range=feature_range)
+        prediction[t] = scaler.fit_transform(np.array(prediction[t]).reshape(-1, 1))
+
+    if plot:
+        for target in targets_lst:
+            prediction[target].hist(bins=30)
+            plt.show()
+
+    print('Borders after rescaling')
+    for t in targets_lst:
+        print(np.max(prediction[t]))
+        print(np.min(prediction[t]))
+
+    return prediction
+
