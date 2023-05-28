@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 import numerapi
 import pandas as pd
 from tqdm import tqdm
@@ -91,7 +92,7 @@ class PostProcessor():
         else:
             raise FileNotFoundError(f"{path} is not a valid path")
 
-    def submit(self, df, filename, submit_type):
+    def submit(self, df, filename, submit_type, keep_diagnostics):
         """
         Submits either live either diagnostics
         If diagnostics are submitted we assume that we have trained
@@ -111,6 +112,9 @@ class PostProcessor():
                 # Upload predictions
                 predictions_df.to_csv(filename, index=False)
                 submission_id = self.napi.upload_predictions(file_path=filename, model_id=model_id)
+                if not keep_diagnostics:
+                    filename_path = Path(filename) 
+                    filename_path.unlink()
         elif submit_type == 'diagnostics':
             for name in tqdm(model_names):
                 predictions_df['prediction'] = self.predictions_gathered_df[name]
@@ -118,5 +122,8 @@ class PostProcessor():
                 # Upload predictions
                 predictions_df.to_csv(filename, index=False)
                 submission_id = self.napi.upload_diagnostics(file_path=filename, model_id=model_id)
+                if not keep_diagnostics:
+                    filename_path = Path(filename) 
+                    filename_path.unlink()
         else:
             raise ValueError("submit_type needs to be either 'prediction' or 'diagnostics'")
