@@ -92,7 +92,7 @@ class PostProcessor():
         else:
             raise FileNotFoundError(f"{path} is not a valid path")
 
-    def submit(self, df, filename, submit_type, keep_diagnostics):
+    def submit(self, df, filename, submit_type, keep_diagnostics=True):
         """
         Submits either live either diagnostics
         If diagnostics are submitted we assume that we have trained
