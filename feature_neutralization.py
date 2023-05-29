@@ -103,13 +103,15 @@ def train_loop_body(model, feats, pred, target_exps):
 
 
 def train_loop(model, optimizer, feats, pred, target_exps, era):
-    for i in range(1000000):
+    for i in range(100000):
         loss, grads = train_loop_body(model, feats, pred, target_exps)
         optimizer.apply_gradients(zip(grads, model.trainable_variables))
         if loss < 1e-7:
+            print(f"broke at era: {int(era)} with loss: {loss:0.7f} at iteration: {i}")
             break
         if i % 10000 == 0:
-            tqdm.write(f'era: {era[3:]} loss: {loss:0.7f}', end='\r')
+            # tqdm.write(f'era: {era[3:]} loss: {loss:0.7f}', end='\r')
+            tqdm.write(f'era: {int(era)} loss: {loss:0.7f}', end='\r')
 
 
 def reduce_exposure(prediction, features, max_exp, era, weights=None):
