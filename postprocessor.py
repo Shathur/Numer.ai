@@ -80,7 +80,8 @@ class PostProcessor():
     def get_id_column(self, df):
         """return index id as a column"""
         if df.index.name == 'id':
-            id_series = df.reset_index()['id']
+            # id_series = df.reset_index()['id']
+            id_series = df.index # much smaller memory blueprint
         else:
             raise ValueError("df should be a DataFrame with an index named 'id'")
         return id_series
@@ -105,6 +106,8 @@ class PostProcessor():
         model_names = self.predictions_gathered_df.columns.tolist()
         # keep id as a column
         predictions_df = self.get_id_column(df).to_frame()
+        # need to also reset the index
+        predictions_df = predictions_df.reset_index(drop=True)
         if submit_type == 'prediction':
             for name in tqdm(model_names):
                 predictions_df['prediction'] = self.predictions_gathered_df[name]
