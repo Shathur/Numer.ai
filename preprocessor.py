@@ -14,7 +14,8 @@ class Preprocessor():
         self.datapath = datapath
         self.train_df = pd.DataFrame()
         self.validation_df = pd.DataFrame(),
-        self.test_df = pd.DataFrame() self.feature_cols = []
+        self.test_df = pd.DataFrame()
+        self.feature_cols = []
         self.target = target
         self.n_splits = n_splits
         self.cv_split_data : []
