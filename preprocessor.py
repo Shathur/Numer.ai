@@ -14,8 +14,7 @@ class Preprocessor():
         self.datapath = datapath
         self.train_df = pd.DataFrame()
         self.validation_df = pd.DataFrame(),
-        self.test_df = pd.DataFrame()
-        self.feature_cols = []
+        self.test_df = pd.DataFrame() self.feature_cols = []
         self.target = target
         self.n_splits = n_splits
         self.cv_split_data : []
@@ -109,6 +108,31 @@ class Preprocessor():
         unique_test_eras = unique_train_eras[-num_tour_eras:]
         self.test_df = self.train_df[self.train_df.isin(unique_test_eras)]
         self.train_df = self.train_df[~self.train_df.isin(unique_test_eras)]
+
+    def save_custom_era_split(
+        self,
+        filename,="full_data_int8.parquet",
+        erasplit=[0,-500,-300,-1],
+        save_filenames=[
+            "new_train.parquet",
+            "new_test.parquet",
+            "new_validation.parquet",
+        ]
+    ):
+        """
+        loads the dataframe of the provided filename and then splits it into train and
+        test data.
+        erasplit : [train_start, train_end, test_start, test_end, validation_start, validation_end]
+        save_filenames : [train_path, test_path, validation_path]
+        """
+        new_train_df = pd.read_parquet(os.path.join(self.datapath,filename))
+        unique_eras = new_train_df["era"].unique().tolist()
+        train_eras = unique_eras[erasplit[0]:erasplit[1]]
+        test_eras = unique_eras[erasplit[2]:erasplit[3]]
+        validation_eras = unique_eras[erasplit[4],erasplit[5]]
+        new_train_df[new_train_df["era"].isin(train_eras)].to_parquet(os.path.join(self.datapath,save_filenames[0]))
+        new_train_df[new_train_df["era"].isin(test_eras)].to_parquet(os.path.join(self.datapath,save_filenames[1]))
+        new_train_df[new_train_df["era"].isin(validation_eras)].to_parquet(self.datapath,save_filenames[2])
 
     def train(self,type_of_model,model_params,fit_params,save_to_drive,save_folder,calculate_metrics,plot_metrics,iteration=0):
         """
