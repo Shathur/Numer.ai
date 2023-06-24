@@ -112,7 +112,7 @@ class Preprocessor():
 
     def save_custom_era_split(
         self,
-        filename,="full_data_int8.parquet",
+        filename="full_data_int8.parquet",
         erasplit=[0,-500,-300,-1],
         save_filenames=[
             "new_train.parquet",
