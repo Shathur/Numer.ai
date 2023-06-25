@@ -71,16 +71,23 @@ class Preprocessor():
             feature_sets
             targets
         feature_group is one of the feature_sets : 
-            one of small
+            small
             medium
+            full
             v2_equivalent_features
             v3_equivalent_features
             fncv3_features
         """
+        possible_feature_list = ["small","medium","full","v2_equivalent_features","v3_equivalent_features","fncv3_features"]
         assert os.path.exists(f'{self.datapath}/features.json'), 'features_json does not exist, need to download it first'
-        f = open(f'{self.datapath}/features.json')
-        features_json = json.load(f)
-        self.feature_cols = features_json['feature_sets'][feature_group]
+        assert feature_group in possible_feature_list, f"unavailable feature_set name -- use one of the following {possible_feature_list}"
+        
+        if feature_group == "full":
+            self.feature_cols = [f for f in self.train_df.columns.tolist() if "feature" in f]
+        else:
+            f = open(f'{self.datapath}/features.json')
+            features_json = json.load(f)
+            self.feature_cols = features_json['feature_sets'][feature_group]
 
     def per_era_correlations(self,df,features,era_col,target_col):
         """Get the correlation of each era with the designated target"""
