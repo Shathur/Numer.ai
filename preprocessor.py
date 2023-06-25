@@ -65,6 +65,18 @@ class Preprocessor():
             self.train_df = pd.concat([self.train_df,self.validation_df])
 
     def get_features(self,feature_group):
+        """
+        features_json contains: 
+            feature_stats
+            feature_sets
+            targets
+        feature_group is one of the feature_sets : 
+            one of small
+            medium
+            v2_equivalent_features
+            v3_equivalent_features
+            fncv3_features
+        """
         assert os.path.exists(f'{self.datapath}/features.json'), 'features_json does not exist, need to download it first'
         f = open(f'{self.datapath}/features.json')
         features_json = json.load(f)
