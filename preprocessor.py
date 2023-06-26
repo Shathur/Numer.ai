@@ -149,7 +149,7 @@ class Preprocessor():
         unique_eras = new_train_df["era"].unique().tolist()
         train_eras = unique_eras[erasplit[0]:erasplit[1]]
         test_eras = unique_eras[erasplit[2]:erasplit[3]]
-        validation_eras = unique_eras[erasplit[4],erasplit[5]]
+        validation_eras = unique_eras[erasplit[4]:erasplit[5]]
         new_train_df[new_train_df["era"].isin(train_eras)].to_parquet(os.path.join(self.datapath,save_filenames[0]))
         new_train_df[new_train_df["era"].isin(test_eras)].to_parquet(os.path.join(self.datapath,save_filenames[1]))
         new_train_df[new_train_df["era"].isin(validation_eras)].to_parquet(self.datapath,save_filenames[2])
